@@ -1,0 +1,18 @@
+packages:
+  "idb": "IndexedDB wrapper for offline storage"
+  "framer-motion": "Animations and layout transitions"
+  "recharts": "Data visualization for Analytics page"
+  "vaul": "Bottom drawer/sheet components"
+  "date-fns": "Date parsing and manipulation"
+  "lucide-react": "Icons"
+  "next-themes": "Dark mode support"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility for merging tailwind classes"
+
+images: []
+
+notes:
+  - App is entirely offline-first using IndexedDB via the 'idb' package.
+  - No backend API calls are made.
+  - The UI uses Bauhaus-inspired muted color palette.
+  - Bottom navigation is the primary routing mechanism.

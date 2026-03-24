@@ -21,7 +21,8 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 ```text
 artifacts-monorepo/
 ├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
+│   ├── api-server/         # Express API server
+│   └── flow-pwa/           # Flōw Time & Habit Tracker PWA (React + Vite)
 ├── lib/                    # Shared libraries
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/   # Generated React Query hooks
@@ -90,6 +91,24 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 ### `lib/api-client-react` (`@workspace/api-client-react`)
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
+
+### `artifacts/flow-pwa` (`@workspace/flow-pwa`)
+
+Flōw — a Bauhaus-inspired, mobile-first Progressive Web App for time tracking, habit tracking, and productivity analytics.
+
+- **100% offline-first**: all data stored in IndexedDB (via `idb`), no backend required
+- **PWA**: configured with `vite-plugin-pwa` (service worker, web manifest, installable)
+- **Design**: Bauhaus-muted palette (dusty terracotta, sage, slate, amber), DM Sans font, dark/light/system mode
+- **Screens**:
+  - Timeline — scrollable 24h view with time blocks, "now" line, day summary bar
+  - Timer — Pomodoro countdown / stopwatch with geometric SVG ring
+  - Habits — daily checklist, streaks, 30-day heatmap
+  - Analytics — stacked bar chart, donut chart, summary cards (Recharts)
+  - Settings — appearance, categories, timer defaults, heartbeat, data export/import
+- **Heartbeat check-in**: periodic slide-up banner ("What are you up to?"), configurable interval
+- **FAB**: centered floating action button opens quick entry drawer (vaul)
+- **Data backup**: JSON export/import with merge or replace mode
+- Dev: `pnpm --filter @workspace/flow-pwa run dev`
 
 ### `scripts` (`@workspace/scripts`)
 
