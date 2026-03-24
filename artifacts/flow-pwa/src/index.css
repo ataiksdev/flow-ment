@@ -206,6 +206,22 @@
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
+/* ─── Time-of-day hour cell colours (light + dark) ────── */
+:root {
+  --hour-night:     #eceaf6;
+  --hour-dawn:      #fef3d5;
+  --hour-morning:   #fffae8;
+  --hour-afternoon: #e6f4ec;
+  --hour-evening:   #e3edf8;
+}
+.dark {
+  --hour-night:     #1e1930;
+  --hour-dawn:      #2a2010;
+  --hour-morning:   #231e0a;
+  --hour-afternoon: #0f1e16;
+  --hour-evening:   #101824;
+}
+
 /* ─── Bauhaus geometric utilities ──────────────────────── */
 @layer utilities {
   /* Diagonal hatching — used as accent on header bands and cards */

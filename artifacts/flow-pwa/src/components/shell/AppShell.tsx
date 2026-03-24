@@ -2,8 +2,7 @@ import { ReactNode, useState, useEffect } from "react";
 import BottomNav from "./BottomNav";
 import { useLocation } from "wouter";
 import { HeartbeatBanner } from "../HeartbeatBanner";
-import { QuickEntryDrawer } from "../QuickEntry";
-import { Plus } from "lucide-react";
+import { NowBar } from "../NowBar";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
@@ -29,28 +28,19 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto relative" style={{ paddingBottom: "5rem" }}>
+      {/* Main Content Area — padded for NowBar + Nav */}
+      <main className="flex-1 overflow-y-auto relative" style={{ paddingBottom: "0" }}>
         {children}
       </main>
 
       {/* Heartbeat Overlay */}
       <HeartbeatBanner />
 
+      {/* Now Bar — current activity + FAB + elapsed timer */}
+      <NowBar />
+
       {/* Bottom Navigation */}
       <BottomNav currentPath={location} />
-
-      {/* Floating Action Button — circle is an intentional Bauhaus primary form */}
-      <QuickEntryDrawer>
-        <button
-          className="fixed bottom-[5.5rem] left-1/2 -translate-x-1/2 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-[3px_3px_0px_hsl(var(--foreground)/0.15)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform border-2 border-foreground/10"
-          data-testid="fab-quick-entry"
-          aria-label="Quick Entry"
-          style={{ borderRadius: "50%" }}
-        >
-          <Plus className="w-6 h-6 stroke-[2.5]" />
-        </button>
-      </QuickEntryDrawer>
     </div>
   );
 }
