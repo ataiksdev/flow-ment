@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { format, addDays, subDays, parseISO, differenceInMinutes, startOfDay } from "date-fns";
+import { format, addDays, subDays, parseISO, differenceInMinutes } from "date-fns";
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { useTimeEntries, useCategories, useSettings } from "@/hooks/useDB";
 import { Link } from "wouter";
+import { EditEntryDrawer } from "@/components/EditEntryDrawer";
+import type { TimeEntry } from "@/lib/db";
 
 const HOUR_HEIGHT = 60; // px per hour
 
 export default function Timeline() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const dateStr = format(currentDate, "yyyy-MM-dd");
   
   const entries = useTimeEntries(dateStr);
@@ -108,7 +111,8 @@ export default function Timeline() {
             return (
               <div 
                 key={entry.id}
-                className="absolute left-16 right-4 rounded-lg overflow-hidden border border-black/5 hover:brightness-95 transition-all shadow-sm group cursor-pointer"
+                onClick={() => setEditingEntry(entry)}
+                className="absolute left-16 right-4 rounded-lg overflow-hidden border border-black/5 hover:brightness-95 active:scale-95 transition-all shadow-sm group cursor-pointer"
                 style={{
                   top: `${top}px`,
                   height: `${Math.max(height, 20)}px`, // min height for visibility
@@ -141,6 +145,9 @@ export default function Timeline() {
           )}
         </div>
       </div>
+
+      {/* Edit Entry Drawer */}
+      <EditEntryDrawer entry={editingEntry} onClose={() => setEditingEntry(null)} />
 
       {/* Footer Day Summary */}
       <div className="sticky bottom-0 z-30 bg-card border-t border-border p-3 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
