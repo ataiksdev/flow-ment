@@ -24,8 +24,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex flex-col h-[100dvh] w-full bg-background text-foreground overflow-hidden">
       {/* Offline Indicator */}
       {!isOnline && (
-        <div className="bg-destructive text-destructive-foreground text-xs py-1 text-center font-medium z-50">
-          You are offline — data saved locally
+        <div className="bg-destructive text-destructive-foreground text-[11px] py-1.5 text-center font-bold uppercase tracking-widest z-50 border-b-2 border-destructive-border">
+          Offline — data saved locally
         </div>
       )}
 
@@ -40,14 +40,15 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Bottom Navigation */}
       <BottomNav currentPath={location} />
 
-      {/* Floating Action Button — pinned above bottom nav */}
+      {/* Floating Action Button — circle is an intentional Bauhaus primary form */}
       <QuickEntryDrawer>
         <button
-          className="fixed bottom-[5.5rem] left-1/2 -translate-x-1/2 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+          className="fixed bottom-[5.5rem] left-1/2 -translate-x-1/2 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-[3px_3px_0px_hsl(var(--foreground)/0.15)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform border-2 border-foreground/10"
           data-testid="fab-quick-entry"
           aria-label="Quick Entry"
+          style={{ borderRadius: "50%" }}
         >
-          <Plus className="w-6 h-6" />
+          <Plus className="w-6 h-6 stroke-[2.5]" />
         </button>
       </QuickEntryDrawer>
     </div>

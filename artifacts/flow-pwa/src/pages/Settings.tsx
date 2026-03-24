@@ -2,9 +2,8 @@ import { useState, useRef } from "react";
 import { useTheme } from "@/providers/ThemeProvider";
 import { useSettings, useUpdateSetting, useCategories, useAddCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/useDB";
 import { exportAllData, importAllData, clearAllData } from "@/lib/db";
-import { Moon, Sun, Monitor, Download, Upload, Trash2, ChevronLeft, Plus, Pencil, Check, X } from "lucide-react";
+import { Moon, Sun, Monitor, Download, Upload, Trash2, Plus, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
-import { Link } from "wouter";
 import type { Category } from "@/lib/db";
 
 const PALETTE = [
@@ -16,14 +15,15 @@ const PALETTE = [
 function CategoryRow({ cat, onEdit }: { cat: Category; onEdit: (c: Category) => void }) {
   const deleteCategory = useDeleteCategory();
   return (
-    <div className="flex items-center gap-3 py-3 border-b last:border-b-0">
-      <span className="w-5 h-5 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
-      <span className="flex-1 text-sm font-semibold truncate">{cat.name}</span>
+    <div className="flex items-center gap-3 py-3 border-b last:border-b-0 border-border">
+      {/* Square colour swatch */}
+      <span className="w-5 h-5 flex-shrink-0 border border-border/50" style={{ backgroundColor: cat.color }} />
+      <span className="flex-1 text-sm font-bold uppercase tracking-wide truncate">{cat.name}</span>
       <button
         onClick={() => onEdit(cat)}
-        className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"
+        className="w-7 h-7 border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
       >
-        <Pencil className="w-4 h-4" />
+        <Pencil className="w-3.5 h-3.5" />
       </button>
       <button
         onClick={async () => {
@@ -32,9 +32,9 @@ function CategoryRow({ cat, onEdit }: { cat: Category; onEdit: (c: Category) => 
             toast.success(`"${cat.name}" deleted`);
           }
         }}
-        className="p-1.5 hover:bg-destructive/10 rounded-lg text-destructive transition-colors"
+        className="w-7 h-7 border border-destructive/30 flex items-center justify-center text-destructive hover:bg-destructive/10 transition-colors"
       >
-        <Trash2 className="w-4 h-4" />
+        <Trash2 className="w-3.5 h-3.5" />
       </button>
     </div>
   );
@@ -53,25 +53,27 @@ function CategoryEditor({
   const [color, setColor] = useState(category?.color || PALETTE[0]);
 
   return (
-    <div className="bg-card border rounded-2xl p-4 shadow-sm space-y-4 mt-3">
+    <div className="bg-card border-2 border-primary p-4 space-y-4 mt-3">
       <input
         autoFocus
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Category name"
-        className="w-full bg-background border rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30"
+        className="w-full bg-background border-2 border-border px-3 py-2 text-sm font-bold uppercase tracking-wide focus:outline-none focus:border-primary placeholder:normal-case placeholder:tracking-normal placeholder:font-normal"
       />
       <div>
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Color</p>
-        <div className="flex flex-wrap gap-2">
+        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Colour</p>
+        {/* Square swatches */}
+        <div className="flex flex-wrap gap-1.5">
           {PALETTE.map((c) => (
             <button
               key={c}
               onClick={() => setColor(c)}
-              className="w-7 h-7 rounded-full border-2 transition-all"
+              className="w-7 h-7 transition-transform"
               style={{
                 backgroundColor: c,
-                borderColor: color === c ? "#111" : "transparent",
+                outline: color === c ? "2px solid hsl(var(--foreground))" : "2px solid transparent",
+                outlineOffset: "2px",
                 transform: color === c ? "scale(1.15)" : "scale(1)",
               }}
             />
@@ -82,13 +84,13 @@ function CategoryEditor({
         <button
           onClick={() => name.trim() && onSave(name.trim(), color)}
           disabled={!name.trim()}
-          className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5 transition-all hover:bg-primary/90"
+          className="flex-1 py-2.5 bg-primary text-primary-foreground font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5 transition-all hover:bg-primary/90 uppercase tracking-wider"
         >
           <Check className="w-4 h-4" /> Save
         </button>
         <button
           onClick={onCancel}
-          className="px-4 py-2.5 rounded-xl bg-muted text-muted-foreground font-bold text-sm flex items-center justify-center gap-1 transition-all hover:bg-muted/80"
+          className="px-4 py-2.5 bg-muted text-muted-foreground font-bold text-sm flex items-center justify-center border border-border hover:bg-border transition-all"
         >
           <X className="w-4 h-4" />
         </button>
@@ -120,7 +122,7 @@ export default function Settings() {
       a.download = `flow-backup-${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Data exported successfully!");
+      toast.success("Exported successfully");
     } catch {
       toast.error("Export failed.");
     }
@@ -134,7 +136,7 @@ export default function Settings() {
       try {
         const json = event.target?.result as string;
         await importAllData(json, importMode);
-        toast.success(`Data imported (${importMode} mode) successfully!`);
+        toast.success(`Imported (${importMode} mode)`);
         setTimeout(() => window.location.reload(), 1500);
       } catch {
         toast.error("Invalid backup file.");
@@ -163,80 +165,80 @@ export default function Settings() {
     setIsNewCat(false);
   };
 
+  const SectionHeader = ({ children }: { children: string }) => (
+    <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 bauhaus-section-rule">
+      {children}
+    </h2>
+  );
+
   return (
-    <div className="flex flex-col h-full bg-background px-4 pt-10 pb-24 overflow-y-auto">
-      <div className="flex items-center gap-3 mb-8">
-        <Link
-          href="/"
-          className="p-2 -ml-2 rounded-full hover:bg-muted text-muted-foreground transition-colors"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </Link>
-        <h1 className="font-serif font-bold text-3xl">Settings</h1>
+    <div className="flex flex-col h-full bg-background px-4 pt-8 pb-24 overflow-y-auto no-scrollbar">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-8 border-b-2 border-border pb-4">
+        <span className="w-3 h-3 bg-secondary flex-shrink-0" />
+        <h1 className="font-bold text-3xl uppercase tracking-tight">Settings</h1>
       </div>
 
       <div className="space-y-10">
         {/* Appearance */}
         <section>
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">Appearance</h2>
-          <div className="bg-card border rounded-2xl p-1.5 flex gap-1 shadow-sm">
-            <button
-              onClick={() => setTheme("light")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${theme === "light" ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
-            >
-              <Sun className="w-4 h-4" /> Light
-            </button>
-            <button
-              onClick={() => setTheme("dark")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${theme === "dark" ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
-            >
-              <Moon className="w-4 h-4" /> Dark
-            </button>
-            <button
-              onClick={() => setTheme("system")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${theme === "system" ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
-            >
-              <Monitor className="w-4 h-4" /> System
-            </button>
+          <SectionHeader>Appearance</SectionHeader>
+          <div className="flex border-2 border-border">
+            {(["light", "dark", "system"] as const).map((t, i) => {
+              const Icon = t === "light" ? Sun : t === "dark" ? Moon : Monitor;
+              return (
+                <button
+                  key={t}
+                  onClick={() => setTheme(t)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-bold uppercase tracking-wide transition-colors ${
+                    i < 2 ? "border-r border-border" : ""
+                  } ${
+                    theme === t
+                      ? "bg-foreground text-background"
+                      : "bg-card text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {t}
+                </button>
+              );
+            })}
           </div>
         </section>
 
         {/* Waking Hours */}
         <section>
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">Waking Hours</h2>
-          <div className="bg-card border rounded-2xl divide-y shadow-sm">
+          <SectionHeader>Waking Hours</SectionHeader>
+          <div className="bg-card border-2 border-border divide-y divide-border">
             <div className="p-4 flex items-center justify-between">
-              <span className="font-semibold text-sm">Wake Time</span>
+              <span className="font-bold text-sm uppercase tracking-wide">Wake</span>
               <input
                 type="time"
                 value={settings.wakeStart || "07:00"}
                 onChange={(e) => updateSetting("wakeStart", e.target.value)}
-                className="bg-background border px-2 py-1 rounded-lg text-sm font-mono focus:outline-none"
+                className="bg-background border-2 border-border px-2 py-1 text-sm font-mono font-bold focus:outline-none focus:border-primary"
               />
             </div>
             <div className="p-4 flex items-center justify-between">
-              <span className="font-semibold text-sm">Sleep Time</span>
+              <span className="font-bold text-sm uppercase tracking-wide">Sleep</span>
               <input
                 type="time"
                 value={settings.wakeEnd || "23:00"}
                 onChange={(e) => updateSetting("wakeEnd", e.target.value)}
-                className="bg-background border px-2 py-1 rounded-lg text-sm font-mono focus:outline-none"
+                className="bg-background border-2 border-border px-2 py-1 text-sm font-mono font-bold focus:outline-none focus:border-primary"
               />
             </div>
           </div>
-          <p className="text-xs text-muted-foreground mt-2 ml-1">
-            Used to calculate active window in Day Summary
-          </p>
         </section>
 
         {/* Categories */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Categories</h2>
+            <SectionHeader>Categories</SectionHeader>
             {!isNewCat && !editingCat && (
               <button
                 onClick={() => { setIsNewCat(true); setEditingCat({}); }}
-                className="p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                className="w-7 h-7 bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -251,7 +253,7 @@ export default function Settings() {
             />
           )}
 
-          <div className="bg-card border rounded-2xl px-4 shadow-sm mt-3">
+          <div className="bg-card border-2 border-border px-4 mt-3">
             {categories.map((cat) => (
               <div key={cat.id}>
                 {editingCat?.id === cat.id && !isNewCat ? (
@@ -268,57 +270,41 @@ export default function Settings() {
               </div>
             ))}
             {categories.length === 0 && (
-              <p className="text-sm text-muted-foreground py-6 text-center">No categories yet. Add one above.</p>
+              <p className="text-sm text-muted-foreground py-6 text-center">No categories yet.</p>
             )}
           </div>
         </section>
 
         {/* Timer Defaults */}
         <section>
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">Timer (Minutes)</h2>
-          <div className="bg-card border rounded-2xl divide-y shadow-sm">
-            <div className="p-4 flex items-center justify-between">
-              <span className="font-semibold text-sm">Focus Session</span>
-              <input
-                type="number"
-                min={1}
-                max={120}
-                value={settings.timerPomodoro || 25}
-                onChange={(e) => updateSetting("timerPomodoro", Number(e.target.value))}
-                className="w-16 bg-background border px-2 py-1 rounded-lg text-center font-mono text-sm"
-              />
-            </div>
-            <div className="p-4 flex items-center justify-between">
-              <span className="font-semibold text-sm">Short Break</span>
-              <input
-                type="number"
-                min={1}
-                max={60}
-                value={settings.timerShortBreak || 5}
-                onChange={(e) => updateSetting("timerShortBreak", Number(e.target.value))}
-                className="w-16 bg-background border px-2 py-1 rounded-lg text-center font-mono text-sm"
-              />
-            </div>
-            <div className="p-4 flex items-center justify-between">
-              <span className="font-semibold text-sm">Long Break</span>
-              <input
-                type="number"
-                min={1}
-                max={60}
-                value={settings.timerLongBreak || 15}
-                onChange={(e) => updateSetting("timerLongBreak", Number(e.target.value))}
-                className="w-16 bg-background border px-2 py-1 rounded-lg text-center font-mono text-sm"
-              />
-            </div>
+          <SectionHeader>Timer (Minutes)</SectionHeader>
+          <div className="bg-card border-2 border-border divide-y divide-border">
+            {[
+              { label: "Focus Session", key: "timerPomodoro", default: 25 },
+              { label: "Short Break", key: "timerShortBreak", default: 5 },
+              { label: "Long Break", key: "timerLongBreak", default: 15 },
+            ].map((item) => (
+              <div key={item.key} className="p-4 flex items-center justify-between">
+                <span className="font-bold text-sm uppercase tracking-wide">{item.label}</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={120}
+                  value={settings[item.key as keyof typeof settings] as number || item.default}
+                  onChange={(e) => updateSetting(item.key as "timerPomodoro", Number(e.target.value))}
+                  className="w-16 bg-background border-2 border-border px-2 py-1 text-center font-mono font-bold text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+            ))}
           </div>
         </section>
 
         {/* Heartbeat */}
         <section>
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">Heartbeat Check-in</h2>
-          <div className="bg-card border rounded-2xl p-4 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-sm">Enable Prompts</span>
+          <SectionHeader>Heartbeat Check-in</SectionHeader>
+          <div className="bg-card border-2 border-border divide-y divide-border">
+            <div className="p-4 flex items-center justify-between">
+              <span className="font-bold text-sm uppercase tracking-wide">Enable Prompts</span>
               <input
                 type="checkbox"
                 checked={settings.heartbeatEnabled !== false}
@@ -326,12 +312,12 @@ export default function Settings() {
                 className="w-5 h-5 accent-primary"
               />
             </div>
-            <div className="flex items-center justify-between pt-2 border-t">
-              <span className="font-semibold text-sm text-muted-foreground">Interval</span>
+            <div className="p-4 flex items-center justify-between">
+              <span className="font-bold text-sm uppercase tracking-wide text-muted-foreground">Interval</span>
               <select
                 value={settings.heartbeatInterval || 30}
                 onChange={(e) => updateSetting("heartbeatInterval", Number(e.target.value))}
-                className="bg-background border px-3 py-1.5 rounded-lg text-sm font-medium focus:outline-none"
+                className="bg-background border-2 border-border px-3 py-1.5 text-sm font-bold focus:outline-none"
               >
                 <option value={15}>15 mins</option>
                 <option value={30}>30 mins</option>
@@ -344,38 +330,32 @@ export default function Settings() {
 
         {/* Data Management */}
         <section>
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">Data Management</h2>
-          <div className="space-y-3">
+          <SectionHeader>Data</SectionHeader>
+          <div className="space-y-[2px]">
             <button
               onClick={handleExport}
-              className="w-full bg-card border flex items-center justify-between p-4 rounded-2xl hover:bg-muted transition-colors shadow-sm"
+              className="w-full bg-card border-2 border-border flex items-center justify-between p-4 hover:bg-muted transition-colors"
             >
-              <span className="font-semibold text-sm">Export Backup (JSON)</span>
+              <span className="font-bold text-sm uppercase tracking-wide">Export Backup (JSON)</span>
               <Download className="w-5 h-5 text-muted-foreground" />
             </button>
 
-            <div className="bg-card border rounded-2xl p-4 shadow-sm space-y-4">
+            <div className="bg-card border-2 border-border p-4 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-sm">Import Mode</span>
+                <span className="font-bold text-sm uppercase tracking-wide">Import Mode</span>
                 <select
                   value={importMode}
                   onChange={(e) => setImportMode(e.target.value as "merge" | "replace")}
-                  className="bg-background border px-3 py-1.5 rounded-lg text-sm focus:outline-none"
+                  className="bg-background border-2 border-border px-3 py-1.5 text-sm font-bold focus:outline-none"
                 >
                   <option value="merge">Merge</option>
                   <option value="replace">Replace All</option>
                 </select>
               </div>
-              <input
-                type="file"
-                accept=".json"
-                className="hidden"
-                ref={fileInputRef}
-                onChange={handleImport}
-              />
+              <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={handleImport} />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full bg-secondary/10 text-secondary border border-secondary/20 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-colors"
+                className="w-full bg-secondary/10 text-secondary border-2 border-secondary/30 flex items-center justify-center gap-2 py-3 font-bold uppercase tracking-wide transition-colors hover:bg-secondary/20"
               >
                 <Upload className="w-4 h-4" /> Select Backup File
               </button>
@@ -383,9 +363,9 @@ export default function Settings() {
 
             <button
               onClick={handleClear}
-              className="w-full bg-destructive/10 text-destructive border border-destructive/20 flex items-center justify-between p-4 rounded-2xl hover:bg-destructive/20 transition-colors"
+              className="w-full bg-destructive/10 text-destructive border-2 border-destructive/30 flex items-center justify-between p-4 hover:bg-destructive/20 transition-colors"
             >
-              <span className="font-bold text-sm">Clear All Data</span>
+              <span className="font-bold text-sm uppercase tracking-wide">Clear All Data</span>
               <Trash2 className="w-5 h-5" />
             </button>
           </div>

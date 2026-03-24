@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -61,69 +62,72 @@
   --font-serif: var(--app-font-serif);
   --font-mono: var(--app-font-mono);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Bauhaus: zero radius everywhere */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
 }
 
 :root {
-  --app-font-sans: 'DM Sans', sans-serif;
-  --app-font-serif: Georgia, serif;
-  --app-font-mono: Menlo, monospace;
-  --radius: 0.75rem;
-  
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
+  /* Space Grotesk — geometric Bauhaus sans */
+  --app-font-sans: 'Space Grotesk', sans-serif;
+  --app-font-serif: 'Space Grotesk', sans-serif;
+  --app-font-mono: 'Space Mono', monospace;
+  --radius: 0px;
+
+  --button-outline: rgba(0,0,0, .12);
+  --badge-outline: rgba(0,0,0, .06);
   --opaque-button-border-intensity: -8;
 
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 42 20% 96%;
-  --foreground: 25 15% 20%;
-  --card: 42 18% 93%;
-  --card-foreground: 25 15% 20%;
-  --card-border: 30 15% 85%;
-  --border: 30 15% 85%;
-  --primary: 20 35% 50%;
-  --primary-foreground: 42 20% 96%;
-  --secondary: 140 18% 55%;
-  --secondary-foreground: 25 15% 20%;
-  --muted: 42 12% 88%;
-  --muted-foreground: 25 10% 50%;
-  --accent: 45 40% 58%;
-  --accent-foreground: 25 15% 20%;
-  --destructive: 0 45% 55%;
-  --destructive-foreground: 42 20% 96%;
-  --input: 30 15% 80%;
-  --ring: 20 35% 50%;
-  --popover: 42 18% 96%;
-  --popover-foreground: 25 15% 20%;
-  --popover-border: 30 15% 85%;
-  --sidebar: 42 18% 93%;
-  --sidebar-foreground: 25 15% 20%;
-  --sidebar-border: 30 15% 85%;
-  --sidebar-primary: 20 35% 50%;
-  --sidebar-primary-foreground: 42 20% 96%;
-  --sidebar-accent: 42 12% 88%;
-  --sidebar-accent-foreground: 25 15% 20%;
-  --sidebar-ring: 20 35% 50%;
-  
-  --chart-1: 20 35% 50%;
-  --chart-2: 140 18% 55%;
-  --chart-3: 45 40% 58%;
-  --chart-4: 220 18% 55%;
-  --chart-5: 180 20% 50%;
+  /* Calm Bauhaus palette — cream, slate, terracotta, sage, amber */
+  --background: 38 18% 94%;
+  --foreground: 25 20% 16%;
+  --card: 38 14% 90%;
+  --card-foreground: 25 20% 16%;
+  --card-border: 30 12% 80%;
+  --border: 30 12% 78%;
+  --primary: 18 38% 46%;
+  --primary-foreground: 38 18% 96%;
+  --secondary: 138 16% 48%;
+  --secondary-foreground: 25 20% 16%;
+  --muted: 38 10% 84%;
+  --muted-foreground: 25 10% 48%;
+  --accent: 42 44% 52%;
+  --accent-foreground: 25 20% 16%;
+  --destructive: 2 48% 52%;
+  --destructive-foreground: 38 18% 96%;
+  --input: 30 12% 76%;
+  --ring: 18 38% 46%;
+  --popover: 38 14% 93%;
+  --popover-foreground: 25 20% 16%;
+  --popover-border: 30 12% 80%;
+  --sidebar: 38 14% 90%;
+  --sidebar-foreground: 25 20% 16%;
+  --sidebar-border: 30 12% 78%;
+  --sidebar-primary: 18 38% 46%;
+  --sidebar-primary-foreground: 38 18% 96%;
+  --sidebar-accent: 38 10% 84%;
+  --sidebar-accent-foreground: 25 20% 16%;
+  --sidebar-ring: 18 38% 46%;
 
-  --shadow-2xs: 0px 2px 0px 0px hsl(25 15% 20% / 0.03);
-  --shadow-xs: 0px 2px 0px 0px hsl(25 15% 20% / 0.05);
-  --shadow-sm: 0px 2px 0px 0px hsl(25 15% 20% / 0.05), 0px 1px 2px -1px hsl(25 15% 20% / 0.05);
-  --shadow: 0px 2px 0px 0px hsl(25 15% 20% / 0.05), 0px 1px 2px -1px hsl(25 15% 20% / 0.05);
-  --shadow-md: 0px 2px 0px 0px hsl(25 15% 20% / 0.05), 0px 2px 4px -1px hsl(25 15% 20% / 0.05);
-  --shadow-lg: 0px 4px 10px 0px hsl(25 15% 20% / 0.08), 0px 4px 6px -1px hsl(25 15% 20% / 0.05);
-  --shadow-xl: 0px 8px 20px 0px hsl(25 15% 20% / 0.1), 0px 8px 10px -1px hsl(25 15% 20% / 0.05);
-  --shadow-2xl: 0px 16px 30px 0px hsl(25 15% 20% / 0.12);
+  --chart-1: 18 38% 46%;
+  --chart-2: 138 16% 48%;
+  --chart-3: 42 44% 52%;
+  --chart-4: 218 20% 52%;
+  --chart-5: 178 20% 46%;
+
+  --shadow-2xs: 0px 1px 0px 0px hsl(25 20% 16% / 0.05);
+  --shadow-xs: 0px 1px 0px 0px hsl(25 20% 16% / 0.06);
+  --shadow-sm: 0px 2px 0px 0px hsl(25 20% 16% / 0.06), 0px 1px 2px -1px hsl(25 20% 16% / 0.05);
+  --shadow: 0px 2px 0px 0px hsl(25 20% 16% / 0.06), 0px 1px 2px -1px hsl(25 20% 16% / 0.05);
+  --shadow-md: 2px 3px 0px 0px hsl(25 20% 16% / 0.10);
+  --shadow-lg: 3px 4px 0px 0px hsl(25 20% 16% / 0.12), 0px 4px 6px -1px hsl(25 20% 16% / 0.06);
+  --shadow-xl: 4px 6px 0px 0px hsl(25 20% 16% / 0.14), 0px 8px 10px -1px hsl(25 20% 16% / 0.08);
+  --shadow-2xl: 5px 8px 0px 0px hsl(25 20% 16% / 0.18);
 
   --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
@@ -139,69 +143,115 @@
   --badge-outline: rgba(255,255,255, .05);
   --opaque-button-border-intensity: 9;
 
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --elevate-1: rgba(255,255,255, .03);
+  --elevate-2: rgba(255,255,255, .08);
 
-  --background: 25 15% 10%;
-  --foreground: 42 20% 90%;
-  --card: 25 12% 14%;
-  --card-foreground: 42 20% 90%;
-  --card-border: 25 10% 22%;
-  --border: 25 10% 22%;
-  --primary: 20 35% 58%;
-  --primary-foreground: 25 15% 10%;
-  --secondary: 140 15% 45%;
-  --secondary-foreground: 42 20% 90%;
-  --muted: 25 10% 18%;
-  --muted-foreground: 42 15% 55%;
-  --accent: 45 38% 52%;
-  --accent-foreground: 25 15% 10%;
-  --destructive: 0 45% 50%;
-  --destructive-foreground: 42 20% 90%;
-  --input: 25 10% 25%;
-  --ring: 20 35% 58%;
-  --popover: 25 12% 14%;
-  --popover-foreground: 42 20% 90%;
-  --popover-border: 25 10% 22%;
-  --sidebar: 25 12% 14%;
-  --sidebar-foreground: 42 20% 90%;
-  --sidebar-border: 25 10% 22%;
-  --sidebar-primary: 20 35% 58%;
-  --sidebar-primary-foreground: 25 15% 10%;
-  --sidebar-accent: 25 10% 18%;
-  --sidebar-accent-foreground: 42 20% 90%;
-  --sidebar-ring: 20 35% 58%;
-  
-  --chart-1: 20 35% 58%;
-  --chart-2: 140 18% 50%;
-  --chart-3: 45 40% 55%;
-  --chart-4: 220 18% 58%;
-  --chart-5: 180 20% 52%;
+  --background: 25 18% 9%;
+  --foreground: 38 16% 88%;
+  --card: 25 14% 13%;
+  --card-foreground: 38 16% 88%;
+  --card-border: 25 10% 20%;
+  --border: 25 10% 20%;
+  --primary: 18 34% 56%;
+  --primary-foreground: 25 18% 9%;
+  --secondary: 138 14% 44%;
+  --secondary-foreground: 38 16% 88%;
+  --muted: 25 10% 17%;
+  --muted-foreground: 38 12% 52%;
+  --accent: 42 40% 50%;
+  --accent-foreground: 25 18% 9%;
+  --destructive: 2 44% 48%;
+  --destructive-foreground: 38 16% 88%;
+  --input: 25 10% 24%;
+  --ring: 18 34% 56%;
+  --popover: 25 14% 13%;
+  --popover-foreground: 38 16% 88%;
+  --popover-border: 25 10% 20%;
+  --sidebar: 25 14% 13%;
+  --sidebar-foreground: 38 16% 88%;
+  --sidebar-border: 25 10% 20%;
+  --sidebar-primary: 18 34% 56%;
+  --sidebar-primary-foreground: 25 18% 9%;
+  --sidebar-accent: 25 10% 17%;
+  --sidebar-accent-foreground: 38 16% 88%;
+  --sidebar-ring: 18 34% 56%;
 
-  --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.2);
-  --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.3);
-  --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0.3), 0px 1px 2px -1px hsl(0 0% 0% / 0.3);
-  --shadow: 0px 2px 0px 0px hsl(0 0% 0% / 0.3), 0px 1px 2px -1px hsl(0 0% 0% / 0.3);
-  --shadow-md: 0px 2px 0px 0px hsl(0 0% 0% / 0.3), 0px 2px 4px -1px hsl(0 0% 0% / 0.3);
-  --shadow-lg: 0px 4px 10px 0px hsl(0 0% 0% / 0.4), 0px 4px 6px -1px hsl(0 0% 0% / 0.3);
-  --shadow-xl: 0px 8px 20px 0px hsl(0 0% 0% / 0.5), 0px 8px 10px -1px hsl(0 0% 0% / 0.4);
-  --shadow-2xl: 0px 16px 30px 0px hsl(0 0% 0% / 0.6);
+  --chart-1: 18 34% 56%;
+  --chart-2: 138 16% 48%;
+  --chart-3: 42 40% 52%;
+  --chart-4: 218 18% 56%;
+  --chart-5: 178 18% 48%;
+
+  --shadow-2xs: 0px 1px 0px 0px hsl(0 0% 0% / 0.25);
+  --shadow-xs: 0px 1px 0px 0px hsl(0 0% 0% / 0.30);
+  --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0.30), 0px 1px 2px -1px hsl(0 0% 0% / 0.30);
+  --shadow: 0px 2px 0px 0px hsl(0 0% 0% / 0.30), 0px 1px 2px -1px hsl(0 0% 0% / 0.30);
+  --shadow-md: 2px 3px 0px 0px hsl(0 0% 0% / 0.36);
+  --shadow-lg: 3px 4px 0px 0px hsl(0 0% 0% / 0.42), 0px 4px 6px -1px hsl(0 0% 0% / 0.30);
+  --shadow-xl: 4px 6px 0px 0px hsl(0 0% 0% / 0.50), 0px 8px 10px -1px hsl(0 0% 0% / 0.40);
+  --shadow-2xl: 5px 8px 0px 0px hsl(0 0% 0% / 0.60);
 }
 
 @layer base {
   * {
     @apply border-border;
+    border-radius: 0 !important;
   }
   body {
     @apply font-sans antialiased bg-background text-foreground selection:bg-primary/20 selection:text-primary;
   }
-  
-  /* Scrollbar hiding for minimal UI */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+
+  /* Scrollbar hiding */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* ─── Bauhaus geometric utilities ──────────────────────── */
+@layer utilities {
+  /* Diagonal hatching — used as accent on header bands and cards */
+  .bauhaus-hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 5px,
+      rgba(0,0,0,0.035) 5px,
+      rgba(0,0,0,0.035) 6px
+    );
   }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  .dark .bauhaus-hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 5px,
+      rgba(255,255,255,0.04) 5px,
+      rgba(255,255,255,0.04) 6px
+    );
+  }
+
+  /* A small rotated square accent — placed via pseudo/inline */
+  .bauhaus-diamond::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: hsl(var(--primary));
+    transform: rotate(45deg);
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Thick left-border section accent */
+  .bauhaus-section-rule {
+    border-left: 4px solid hsl(var(--primary));
+    padding-left: 10px;
+  }
+
+  /* Circle accent — intentional Bauhaus primary form */
+  .bauhaus-circle-accent {
+    width: 10px;
+    height: 10px;
+    border-radius: 50% !important;
+    background: hsl(var(--primary));
+    flex-shrink: 0;
   }
 }

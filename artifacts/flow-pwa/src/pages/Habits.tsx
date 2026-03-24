@@ -6,6 +6,7 @@ import { useHabits, useHabitLogs, useAddHabit, useUpdateHabit, useDeleteHabit, u
 import { Drawer } from "vaul";
 import type { Habit } from "@/lib/db";
 
+// Square swatches — pure Bauhaus geometry
 const COLORS = ["#C17C5B", "#6B7B5E", "#C4A35A", "#7B7B9E", "#5E7B7B", "#B5697D", "#7B6B9E", "#9E8F7B"];
 
 interface HabitFormProps {
@@ -23,12 +24,12 @@ function HabitForm({ initial, onSave, onCancel, title }: HabitFormProps) {
     <Drawer.Root open onOpenChange={(open) => !open && onCancel()}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50 backdrop-blur-sm" />
-        <Drawer.Content className="bg-card flex flex-col rounded-t-[2rem] mt-24 fixed bottom-0 left-0 right-0 z-50 pb-8 px-6 pt-4">
-          <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/30 mb-6" />
+        <Drawer.Content className="bg-card flex flex-col mt-24 fixed bottom-0 left-0 right-0 z-50 pb-8 px-6 pt-4 border-t-2 border-border">
+          <div className="mx-auto w-12 h-0.5 flex-shrink-0 bg-muted-foreground/30 mb-6" />
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold font-serif">{title}</h2>
-            <button onClick={onCancel} className="p-2 rounded-full hover:bg-muted text-muted-foreground">
-              <X className="w-5 h-5" />
+            <h2 className="text-2xl font-bold uppercase tracking-tight">{title}</h2>
+            <button onClick={onCancel} className="w-9 h-9 border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors">
+              <X className="w-4 h-4" />
             </button>
           </div>
 
@@ -38,19 +39,22 @@ function HabitForm({ initial, onSave, onCancel, title }: HabitFormProps) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Habit name (e.g. Read 10 pages)"
-            className="w-full bg-background border-2 border-border px-4 py-4 rounded-xl text-lg font-medium focus:outline-none focus:border-primary mb-6"
+            className="w-full bg-background border-2 border-border px-4 py-4 text-lg font-bold focus:outline-none focus:border-primary mb-6 placeholder:text-muted-foreground/50 uppercase tracking-wide"
           />
 
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Color</p>
-          <div className="flex gap-3 mb-8 flex-wrap">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Colour</p>
+          {/* Square swatches — Bauhaus */}
+          <div className="flex gap-2 mb-8 flex-wrap">
             {COLORS.map((c) => (
               <button
                 key={c}
                 onClick={() => setColor(c)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform ${color === c ? "scale-110 shadow-md ring-2 ring-offset-2 ring-foreground/30" : ""}`}
+                className={`w-10 h-10 flex items-center justify-center transition-transform ${
+                  color === c ? "scale-110 outline outline-2 outline-offset-2 outline-foreground/40" : ""
+                }`}
                 style={{ backgroundColor: c }}
               >
-                {color === c && <Check className="w-5 h-5 text-white" />}
+                {color === c && <Check className="w-5 h-5 text-white stroke-[3]" />}
               </button>
             ))}
           </div>
@@ -58,7 +62,7 @@ function HabitForm({ initial, onSave, onCancel, title }: HabitFormProps) {
           <button
             onClick={() => name.trim() && onSave(name.trim(), color)}
             disabled={!name.trim()}
-            className="w-full py-4 rounded-xl font-bold text-primary-foreground bg-primary disabled:opacity-50 hover:bg-primary/90 transition-all shadow-lg"
+            className="w-full py-4 font-bold text-primary-foreground bg-primary disabled:opacity-50 hover:bg-primary/90 transition-all border-2 border-primary uppercase tracking-wider"
           >
             Save Habit
           </button>
@@ -108,32 +112,39 @@ export default function Habits() {
   };
 
   const handleDelete = async (habit: Habit) => {
-    if (confirm(`Delete "${habit.name}"? This will hide it from future tracking.`)) {
+    if (confirm(`Delete "${habit.name}"?`)) {
       await deleteHabit(habit.id!);
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-background relative px-4 pt-10 pb-24">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="font-serif font-bold text-3xl">Habits</h1>
+    <div className="flex flex-col h-full bg-background relative px-4 pt-8 pb-24">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8 border-b-2 border-border pb-4">
+        <div className="flex items-center gap-3">
+          {/* Bauhaus circle accent */}
+          <span className="w-3 h-3 bg-primary flex-shrink-0" style={{ borderRadius: "50%" }} />
+          <h1 className="font-bold text-3xl uppercase tracking-tight">Habits</h1>
+        </div>
         <button
           onClick={() => setAddOpen(true)}
-          className="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+          className="w-9 h-9 bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors border-2 border-primary"
           data-testid="habits-add-btn"
         >
-          <Plus className="w-6 h-6" />
+          <Plus className="w-5 h-5 stroke-[2.5]" />
         </button>
       </div>
 
       {/* Today's Checklist */}
-      <section className="mb-12">
-        <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">Today</h2>
-        <div className="space-y-3">
+      <section className="mb-10">
+        <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 bauhaus-section-rule">
+          Today
+        </h2>
+        <div className="space-y-[2px]">
           {habits.length === 0 ? (
-            <div className="p-6 text-center border-2 border-dashed border-border rounded-2xl text-muted-foreground">
-              <p>No habits tracked yet.</p>
-              <p className="text-xs mt-1 text-muted-foreground/70">Tap the + to add one</p>
+            <div className="p-6 text-center border-2 border-dashed border-border text-muted-foreground bauhaus-hatch">
+              <p className="font-bold uppercase tracking-wide text-sm">No habits tracked yet.</p>
+              <p className="text-xs mt-1 text-muted-foreground/70">Tap + to add one</p>
             </div>
           ) : (
             habits.map((habit) => {
@@ -141,9 +152,14 @@ export default function Habits() {
               return (
                 <div
                   key={habit.id}
-                  className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${isDone ? "bg-card border-transparent shadow-sm" : "bg-background border-border hover:bg-muted/50"}`}
+                  className={`flex items-center gap-3 px-3 py-3 border transition-all ${
+                    isDone
+                      ? "bg-card border-border border-l-4"
+                      : "bg-background border-border hover:bg-muted/50"
+                  }`}
+                  style={isDone ? { borderLeftColor: habit.color } : {}}
                 >
-                  {/* Checkbox */}
+                  {/* Square checkbox — pure Bauhaus */}
                   <motion.div
                     onClick={() => toggleLog(habit.id!, todayStr)}
                     initial={false}
@@ -151,39 +167,40 @@ export default function Habits() {
                       backgroundColor: isDone ? habit.color : "transparent",
                       borderColor: isDone ? habit.color : "hsl(var(--muted-foreground))",
                     }}
-                    className="w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 cursor-pointer"
+                    className="w-6 h-6 border-2 flex items-center justify-center shrink-0 cursor-pointer"
                   >
-                    {isDone && <Check className="w-4 h-4 text-white" />}
+                    {isDone && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
                   </motion.div>
 
                   {/* Label */}
                   <span
                     onClick={() => toggleLog(habit.id!, todayStr)}
-                    className="flex-1 font-bold cursor-pointer text-foreground"
+                    className={`flex-1 font-bold cursor-pointer text-sm uppercase tracking-wide ${
+                      isDone ? "line-through text-muted-foreground" : "text-foreground"
+                    }`}
                   >
                     {habit.name}
                   </span>
 
-                  {/* Streak */}
-                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted/80 shrink-0">
-                    <span className="text-xs font-bold text-muted-foreground">{getStreak(habit.id!)}</span>
-                    <span className="text-[10px] uppercase text-muted-foreground/70 font-semibold">Day</span>
+                  {/* Streak — square badge */}
+                  <div className="flex items-center gap-1 px-2 py-1 bg-muted border border-border shrink-0">
+                    <span className="text-[10px] font-mono font-bold text-foreground">{getStreak(habit.id!)}</span>
+                    <span className="text-[9px] uppercase text-muted-foreground font-bold">d</span>
                   </div>
 
-                  {/* Edit / Delete */}
                   <button
                     onClick={() => setEditingHabit(habit)}
-                    className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors shrink-0"
+                    className="w-7 h-7 border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors shrink-0"
                     aria-label="Edit habit"
                   >
-                    <Pencil className="w-4 h-4" />
+                    <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDelete(habit)}
-                    className="p-1.5 hover:bg-destructive/10 rounded-lg text-destructive transition-colors shrink-0"
+                    className="w-7 h-7 border border-destructive/30 flex items-center justify-center text-destructive hover:bg-destructive/10 transition-colors shrink-0"
                     aria-label="Delete habit"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               );
@@ -195,21 +212,23 @@ export default function Habits() {
       {/* 30-Day Heatmap */}
       {habits.length > 0 && (
         <section>
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">30-Day Overview</h2>
-          <div className="bg-card rounded-2xl p-4 border border-border shadow-sm overflow-x-auto no-scrollbar">
-            <div className="min-w-max space-y-4">
+          <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 bauhaus-section-rule">
+            30-Day Overview
+          </h2>
+          <div className="bg-card border-2 border-border p-4 overflow-x-auto no-scrollbar">
+            <div className="min-w-max space-y-3">
               {habits.map((habit) => (
-                <div key={habit.id} className="flex items-center gap-4">
-                  <span className="w-20 truncate text-xs font-bold text-foreground text-right">
+                <div key={habit.id} className="flex items-center gap-3">
+                  <span className="w-16 truncate text-[10px] font-bold text-foreground text-right uppercase tracking-wide">
                     {habit.name}
                   </span>
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-[2px]">
                     {last30Days.map((dateStr) => {
                       const isDone = allLogs.some((l) => l.habitId === habit.id && l.date === dateStr);
                       return (
                         <div
                           key={dateStr}
-                          className="w-3.5 h-3.5 rounded-sm transition-colors"
+                          className="w-3 h-3 transition-colors"
                           style={{ backgroundColor: isDone ? habit.color : "hsl(var(--muted))" }}
                           title={dateStr}
                         />
@@ -223,16 +242,9 @@ export default function Habits() {
         </section>
       )}
 
-      {/* Add Habit Form */}
       {addOpen && (
-        <HabitForm
-          title="New Habit"
-          onSave={handleAdd}
-          onCancel={() => setAddOpen(false)}
-        />
+        <HabitForm title="New Habit" onSave={handleAdd} onCancel={() => setAddOpen(false)} />
       )}
-
-      {/* Edit Habit Form */}
       {editingHabit && (
         <HabitForm
           title="Edit Habit"

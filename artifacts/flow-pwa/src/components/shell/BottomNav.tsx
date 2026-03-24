@@ -16,33 +16,38 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
   ];
 
   return (
-    <nav className="w-full bg-card border-t border-border pb-[env(safe-area-inset-bottom)] z-40">
-      <div className="flex items-center justify-around h-16 px-1">
+    <nav className="w-full bg-card border-t-2 border-border pb-[env(safe-area-inset-bottom)] z-40">
+      <div className="flex items-stretch h-16 px-0">
         {navItems.map((item) => {
-          const isActive = currentPath === item.path || (item.path !== "/" && currentPath.startsWith(item.path));
+          const isActive =
+            currentPath === item.path ||
+            (item.path !== "/" && currentPath.startsWith(item.path));
           const Icon = item.icon;
 
           return (
             <Link
               key={item.name}
               href={item.path}
-              className="flex-1 flex flex-col items-center justify-center h-full relative cursor-pointer"
+              className={clsx(
+                "flex-1 flex flex-col items-center justify-center h-full relative cursor-pointer transition-colors duration-150",
+                isActive ? "bg-primary/8" : "hover:bg-muted/60"
+              )}
               data-testid={`nav-${item.name.toLowerCase()}`}
             >
-              <div className="relative p-1">
-                {isActive && (
-                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+              {/* Bauhaus top-line active indicator */}
+              {isActive && (
+                <span className="absolute top-0 left-0 right-0 h-[3px] bg-primary" />
+              )}
+
+              <Icon
+                className={clsx(
+                  "w-[18px] h-[18px] transition-colors duration-150",
+                  isActive ? "text-primary" : "text-muted-foreground"
                 )}
-                <Icon
-                  className={clsx(
-                    "w-5 h-5 transition-colors duration-200",
-                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                  )}
-                />
-              </div>
+              />
               <span
                 className={clsx(
-                  "text-[9px] mt-0.5 font-medium",
+                  "text-[9px] mt-1 font-bold uppercase tracking-wider",
                   isActive ? "text-primary" : "text-muted-foreground"
                 )}
               >

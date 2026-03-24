@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Play, Pause, RotateCcw, Save } from "lucide-react";
 import { format } from "date-fns";
 import { useSettings, useCategories, useAddTimerSession } from "@/hooks/useDB";
@@ -15,13 +15,12 @@ export default function Timer() {
 
   const [mode, setMode] = useState<TimerMode>("pomodoro");
   const [pomoType, setPomodoroType] = useState<PomodoroType>("focus");
-  
+
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [sessionLabel, setSessionLabel] = useState("Deep Work Session");
   const [totalDuration, setTotalDuration] = useState(25 * 60);
 
-  // Completion Drawer State
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [categoryId, setCategoryId] = useState<number | null>(null);
 
@@ -49,7 +48,7 @@ export default function Timer() {
             }
             return prev - 1;
           } else {
-            return prev + 1; // stopwatch counts up
+            return prev + 1;
           }
         });
       }, 1000);
@@ -58,7 +57,7 @@ export default function Timer() {
   }, [isRunning, mode, pomoType]);
 
   const toggleTimer = () => setIsRunning(!isRunning);
-  
+
   const resetTimer = () => {
     setIsRunning(false);
     if (mode === "pomodoro") {
@@ -90,7 +89,7 @@ export default function Timer() {
     if (durationSecs <= 0) return;
     const start = new Date(end.getTime() - durationSecs * 1000);
     const label = sessionLabel || (mode === "pomodoro" ? "Pomodoro Session" : "Stopwatch Session");
-    
+
     await addTimerSession({
       label,
       categoryId,
@@ -104,109 +103,171 @@ export default function Timer() {
     resetTimer();
   };
 
-  // SVG Circle calculations
-  const radius = 120;
+  // SVG Circle — kept as intentional Bauhaus primary circle form
+  const radius = 116;
   const circumference = 2 * Math.PI * radius;
   let progress = 1;
   if (mode === "pomodoro") {
     progress = timeLeft / totalDuration;
   } else {
-    progress = (timeLeft % 60) / 60; // 1 min rotation for stopwatch
+    progress = (timeLeft % 60) / 60;
   }
   const strokeDashoffset = circumference - progress * circumference;
 
-  const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-  const secs = (timeLeft % 60).toString().padStart(2, '0');
+  const mins = Math.floor(timeLeft / 60).toString().padStart(2, "0");
+  const secs = (timeLeft % 60).toString().padStart(2, "0");
+
+  const trackColor =
+    pomoType === "focus" || mode === "stopwatch"
+      ? "hsl(var(--primary))"
+      : "hsl(var(--secondary))";
 
   return (
-    <div className="flex flex-col h-full bg-background pt-12 pb-24 px-6 items-center">
-      {/* Mode Toggle */}
-      <div className="bg-muted p-1 rounded-full flex gap-1 mb-10 w-full max-w-xs">
-        <button 
+    <div className="flex flex-col h-full bg-background pt-10 pb-24 px-6 items-center overflow-y-auto no-scrollbar">
+
+      {/* Mode Toggle — sharp rectangular segments, Bauhaus */}
+      <div className="w-full max-w-xs mb-8 flex border-2 border-border">
+        <button
           onClick={() => handleModeSwitch("pomodoro")}
-          className={clsx("flex-1 py-2 rounded-full text-sm font-bold transition-all", mode === "pomodoro" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")}
+          className={clsx(
+            "flex-1 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors border-r border-border",
+            mode === "pomodoro"
+              ? "bg-foreground text-background"
+              : "bg-card text-muted-foreground hover:bg-muted"
+          )}
         >
-          Pomodoro
+          Focus
         </button>
-        <button 
+        <button
           onClick={() => handleModeSwitch("stopwatch")}
-          className={clsx("flex-1 py-2 rounded-full text-sm font-bold transition-all", mode === "stopwatch" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")}
+          className={clsx(
+            "flex-1 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors",
+            mode === "stopwatch"
+              ? "bg-foreground text-background"
+              : "bg-card text-muted-foreground hover:bg-muted"
+          )}
         >
           Stopwatch
         </button>
       </div>
 
+      {/* Pomodoro sub-type — bold underline tabs */}
       {mode === "pomodoro" && (
-        <div className="flex gap-4 mb-12">
+        <div className="flex gap-0 mb-10 border-b-2 border-border w-full max-w-xs">
           {(["focus", "shortBreak", "longBreak"] as PomodoroType[]).map((t) => (
             <button
               key={t}
-              onClick={() => { setPomodoroType(t); setIsRunning(false); }}
+              onClick={() => {
+                setPomodoroType(t);
+                setIsRunning(false);
+              }}
               className={clsx(
-                "text-xs font-bold uppercase tracking-wider transition-colors pb-1 border-b-2",
-                pomoType === t ? "text-primary border-primary" : "text-muted-foreground border-transparent"
+                "flex-1 py-2 text-[10px] font-bold uppercase tracking-wider transition-all border-b-[3px] -mb-[2px]",
+                pomoType === t
+                  ? "text-primary border-primary"
+                  : "text-muted-foreground border-transparent hover:text-foreground"
               )}
             >
-              {t.replace(/([A-Z])/g, ' $1').trim()}
+              {t === "focus" ? "Focus" : t === "shortBreak" ? "Short" : "Long"}
             </button>
           ))}
         </div>
       )}
 
-      {/* Circle Timer */}
-      <div className="relative flex items-center justify-center mb-12 drop-shadow-xl">
-        <svg width="300" height="300" className="-rotate-90">
+      {/* Circular Timer — Bauhaus circle (primary geometric form) */}
+      <div className="relative flex items-center justify-center mb-10">
+        <svg width="280" height="280" className="-rotate-90">
+          {/* Background track */}
           <circle
-            cx="150" cy="150" r={radius}
-            stroke="currentColor" strokeWidth="8" fill="transparent"
-            className="text-muted opacity-30"
+            cx="140" cy="140" r={radius}
+            stroke="hsl(var(--muted))"
+            strokeWidth="10"
+            fill="transparent"
           />
+          {/* Diagonal hatch fill inside circle — Bauhaus texture */}
           <circle
-            cx="150" cy="150" r={radius}
-            stroke={pomoType === "focus" || mode === "stopwatch" ? "hsl(var(--primary))" : "hsl(var(--secondary))"}
-            strokeWidth="8" fill="transparent"
+            cx="140" cy="140" r={radius - 6}
+            fill="hsl(var(--card))"
+          />
+          {/* Progress arc */}
+          <circle
+            cx="140" cy="140" r={radius}
+            stroke={trackColor}
+            strokeWidth="10"
+            fill="transparent"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
+            strokeLinecap="square"
             className="transition-all duration-1000 ease-linear"
           />
+          {/* Corner square tick marks — Bauhaus decoration */}
+          {[0, 90, 180, 270].map((deg) => {
+            const rad = (deg * Math.PI) / 180;
+            const x = 140 + (radius + 14) * Math.sin(rad);
+            const y = 140 - (radius + 14) * Math.cos(rad);
+            return (
+              <rect
+                key={deg}
+                x={x - 3} y={y - 3} width={6} height={6}
+                fill="hsl(var(--muted-foreground))"
+                opacity={0.3}
+                transform={`rotate(${deg}, ${x}, ${y})`}
+              />
+            );
+          })}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-mono text-6xl font-bold tracking-tighter text-foreground">
+          <span className="font-mono text-5xl font-bold tracking-tighter text-foreground">
             {mins}:{secs}
           </span>
-          {mode === "stopwatch" && <span className="text-muted-foreground font-mono mt-2">counting...</span>}
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
+            {mode === "stopwatch" ? "elapsed" : pomoType === "focus" ? "focus" : "break"}
+          </span>
         </div>
       </div>
 
-      {/* Editable Label */}
-      <input 
+      {/* Session label */}
+      <input
         type="text"
         value={sessionLabel}
         onChange={(e) => setSessionLabel(e.target.value)}
-        className="bg-transparent text-center text-xl font-serif font-bold focus:outline-none focus:border-b-2 border-primary border-transparent pb-1 mb-10 w-full max-w-xs transition-colors placeholder:text-muted-foreground/50"
+        className="bg-transparent text-center text-lg font-bold focus:outline-none border-b-2 border-transparent focus:border-primary pb-1 mb-8 w-full max-w-xs transition-colors placeholder:text-muted-foreground/50 uppercase tracking-wide"
         placeholder="Session goal..."
       />
 
       {/* Controls */}
-      <div className="flex items-center gap-6">
-        <button onClick={resetTimer} className="w-14 h-14 rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors">
-          <RotateCcw className="w-6 h-6" />
-        </button>
-        
-        <button 
-          onClick={toggleTimer} 
-          className="w-20 h-20 rounded-full bg-primary text-primary-foreground shadow-[0_8px_20px_-4px_hsl(var(--primary)/0.5)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+      <div className="flex items-center gap-5">
+        {/* Reset — square */}
+        <button
+          onClick={resetTimer}
+          className="w-12 h-12 bg-card border-2 border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
         >
-          {isRunning ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
+          <RotateCcw className="w-5 h-5" />
         </button>
 
+        {/* Play/Pause — circle (Bauhaus primary form) */}
+        <button
+          onClick={toggleTimer}
+          className="w-20 h-20 bg-primary text-primary-foreground flex items-center justify-center hover:scale-105 active:scale-95 transition-transform border-2 border-foreground/10 shadow-[3px_3px_0px_hsl(var(--foreground)/0.15)]"
+          style={{ borderRadius: "50%" }}
+        >
+          {isRunning ? (
+            <Pause className="w-8 h-8 fill-current" />
+          ) : (
+            <Play className="w-8 h-8 fill-current ml-1" />
+          )}
+        </button>
+
+        {/* Save — square */}
         {mode === "stopwatch" && !isRunning && timeLeft > 0 ? (
-          <button onClick={() => setDrawerOpen(true)} className="w-14 h-14 rounded-full bg-accent text-accent-foreground shadow-md flex items-center justify-center hover:scale-105 transition-transform">
-            <Save className="w-6 h-6" />
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="w-12 h-12 bg-accent text-accent-foreground border-2 border-border flex items-center justify-center hover:scale-105 transition-transform"
+          >
+            <Save className="w-5 h-5" />
           </button>
         ) : (
-          <div className="w-14" /> // spacer
+          <div className="w-12" />
         )}
       </div>
 
@@ -214,20 +275,26 @@ export default function Timer() {
       <Drawer.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50 backdrop-blur-sm" />
-          <Drawer.Content className="bg-card flex flex-col rounded-t-[2rem] h-auto mt-24 fixed bottom-0 left-0 right-0 z-50 pb-8 px-6 pt-4">
-            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/30 mb-6" />
-            <h2 className="text-2xl font-bold font-serif mb-2">Save Session</h2>
-            <p className="text-muted-foreground font-mono text-sm mb-6">Duration: {Math.round((mode === "pomodoro" ? totalDuration : timeLeft) / 60)} min</p>
+          <Drawer.Content className="bg-card flex flex-col h-auto mt-24 fixed bottom-0 left-0 right-0 z-50 pb-8 px-6 pt-4 border-t-2 border-border">
+            <div className="mx-auto w-12 h-0.5 flex-shrink-0 bg-muted-foreground/30 mb-6" />
+            <h2 className="text-2xl font-bold uppercase tracking-tight mb-1">Save Session</h2>
+            <p className="text-muted-foreground font-mono text-sm mb-6">
+              {Math.round((mode === "pomodoro" ? totalDuration : timeLeft) / 60)} min
+            </p>
 
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 block">Select Category</label>
-            <div className="flex gap-3 overflow-x-auto pb-6 no-scrollbar -mx-2 px-2">
-              {categories.map(cat => (
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3 block">
+              Category
+            </label>
+            <div className="flex gap-2 overflow-x-auto pb-6 no-scrollbar -mx-2 px-2">
+              {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setCategoryId(cat.id!)}
                   className={clsx(
-                    "flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border-2",
-                    categoryId === cat.id ? "text-white shadow-md border-transparent" : "bg-background border-border text-foreground hover:bg-muted"
+                    "flex-shrink-0 px-4 py-2 text-sm font-bold uppercase tracking-wide transition-all border-2",
+                    categoryId === cat.id
+                      ? "text-white border-transparent"
+                      : "bg-background border-border text-foreground hover:bg-muted"
                   )}
                   style={categoryId === cat.id ? { backgroundColor: cat.color } : {}}
                 >
@@ -239,7 +306,7 @@ export default function Timer() {
             <button
               onClick={saveSession}
               disabled={!categoryId}
-              className="w-full py-4 rounded-xl font-bold text-primary-foreground bg-primary disabled:opacity-50 hover:bg-primary/90 transition-all shadow-lg mt-2"
+              className="w-full py-4 font-bold text-primary-foreground bg-primary disabled:opacity-50 hover:bg-primary/90 transition-all border-2 border-primary mt-2 uppercase tracking-wider"
             >
               Log Time
             </button>

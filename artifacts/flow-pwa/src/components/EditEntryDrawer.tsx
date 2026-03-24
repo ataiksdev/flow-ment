@@ -59,24 +59,24 @@ export function EditEntryDrawer({ entry, onClose }: EditEntryDrawerProps) {
     <Drawer.Root open={!!entry} onOpenChange={(open) => !open && onClose()}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50 backdrop-blur-sm" />
-        <Drawer.Content className="bg-card flex flex-col rounded-t-[2rem] h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-50 focus:outline-none">
-          <div className="p-4 bg-card flex-1 rounded-t-[2rem] overflow-y-auto">
-            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/30 mb-8" />
+        <Drawer.Content className="bg-card flex flex-col h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-50 focus:outline-none border-t-2 border-border">
+          <div className="p-5 bg-card flex-1 overflow-y-auto">
+            <div className="mx-auto w-12 h-0.5 flex-shrink-0 bg-muted-foreground/30 mb-8" />
 
-            <div className="max-w-md mx-auto px-2">
+            <div className="max-w-md mx-auto">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold font-serif">Edit Entry</h2>
+                <h2 className="text-2xl font-bold uppercase tracking-tight">Edit Entry</h2>
                 <div className="flex gap-2">
                   <button
                     onClick={handleDelete}
-                    className="p-2 rounded-full hover:bg-destructive/10 text-destructive transition-colors"
+                    className="w-9 h-9 border border-destructive/30 flex items-center justify-center text-destructive hover:bg-destructive/10 transition-colors"
                     aria-label="Delete entry"
                   >
-                    <Trash2 className="w-5 h-5" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                   <Drawer.Close asChild>
-                    <button className="p-2 rounded-full hover:bg-muted text-muted-foreground transition-colors">
-                      <X className="w-5 h-5" />
+                    <button className="w-9 h-9 border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors">
+                      <X className="w-4 h-4" />
                     </button>
                   </Drawer.Close>
                 </div>
@@ -88,13 +88,15 @@ export function EditEntryDrawer({ entry, onClose }: EditEntryDrawerProps) {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="What were you doing?"
-                  className="w-full bg-transparent border-none text-xl font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 resize-none"
+                  className="w-full bg-transparent border-none text-xl font-bold placeholder:text-muted-foreground/50 placeholder:font-normal focus:outline-none focus:ring-0 resize-none uppercase tracking-wide"
                   rows={2}
                 />
 
                 <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 block">Category</label>
-                  <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar px-1 -mx-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 block">
+                    Category
+                  </label>
+                  <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar -mx-1 px-1">
                     {categories.map((cat) => {
                       const isSelected = categoryId === cat.id;
                       return (
@@ -102,15 +104,15 @@ export function EditEntryDrawer({ entry, onClose }: EditEntryDrawerProps) {
                           key={cat.id}
                           onClick={() => setCategoryId(cat.id!)}
                           className={clsx(
-                            "flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all duration-200 border",
+                            "flex items-center gap-2 px-3 py-2 whitespace-nowrap text-xs font-bold uppercase tracking-wide transition-all border-2",
                             isSelected
-                              ? "border-transparent text-white shadow-md scale-105"
+                              ? "border-transparent text-white"
                               : "border-border bg-background text-foreground hover:bg-muted"
                           )}
                           style={isSelected ? { backgroundColor: cat.color } : {}}
                         >
                           {!isSelected && (
-                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                            <span className="w-2 h-2 flex-shrink-0" style={{ backgroundColor: cat.color }} />
                           )}
                           {cat.name}
                         </button>
@@ -119,38 +121,44 @@ export function EditEntryDrawer({ entry, onClose }: EditEntryDrawerProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 pt-2">
-                  <div className="flex-1 bg-background border rounded-xl p-3">
-                    <label className="text-xs text-muted-foreground block mb-1">From</label>
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="flex-1 bg-background border-2 border-border p-3">
+                    <label className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest block mb-1">
+                      From
+                    </label>
                     <input
                       type="time"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full bg-transparent text-lg font-mono font-medium focus:outline-none"
+                      className="w-full bg-transparent text-lg font-mono font-bold focus:outline-none"
                     />
                   </div>
-                  <div className="w-4 h-[2px] bg-border" />
-                  <div className="flex-1 bg-background border rounded-xl p-3">
-                    <label className="text-xs text-muted-foreground block mb-1">To</label>
+                  <div className="w-5 h-[2px] bg-border flex-shrink-0" />
+                  <div className="flex-1 bg-background border-2 border-border p-3">
+                    <label className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest block mb-1">
+                      To
+                    </label>
                     <input
                       type="time"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full bg-transparent text-lg font-mono font-medium focus:outline-none"
+                      className="w-full bg-transparent text-lg font-mono font-bold focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="pt-4">
                   {startTime >= endTime && (
-                    <p className="text-destructive text-xs font-medium text-center mb-3">End time must be after start time</p>
+                    <p className="text-destructive text-xs font-bold uppercase tracking-wide text-center mb-3">
+                      End must be after start
+                    </p>
                   )}
                   <button
                     onClick={handleSave}
                     disabled={!categoryId || startTime >= endTime}
-                    className="w-full py-4 rounded-xl font-bold text-primary-foreground bg-primary disabled:opacity-50 hover:bg-primary/90 active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2"
+                    className="w-full py-4 font-bold text-primary-foreground bg-primary disabled:opacity-50 hover:bg-primary/90 active:scale-95 transition-all border-2 border-primary flex items-center justify-center gap-2 uppercase tracking-wider"
                   >
-                    <Check className="w-5 h-5" /> Save Changes
+                    <Check className="w-5 h-5 stroke-[2.5]" /> Save Changes
                   </button>
                 </div>
               </div>

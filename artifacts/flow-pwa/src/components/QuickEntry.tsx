@@ -12,15 +12,13 @@ export function QuickEntryDrawer({ children }: { children: ReactNode }) {
 
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<number | null>(null);
-  
-  // Format defaults for time inputs (HH:mm)
+
   const now = new Date();
   const thirtyMinsAgo = subMinutes(now, 30);
-  
+
   const [startTime, setStartTime] = useState(format(thirtyMinsAgo, "HH:mm"));
   const [endTime, setEndTime] = useState(format(now, "HH:mm"));
 
-  // Reset state when opened
   useEffect(() => {
     if (open) {
       setDescription("");
@@ -35,13 +33,9 @@ export function QuickEntryDrawer({ children }: { children: ReactNode }) {
 
   const handleSave = async () => {
     if (!categoryId) return;
-    
-    // Construct ISO strings
     const dateStr = format(new Date(), "yyyy-MM-dd");
     const startIso = new Date(`${dateStr}T${startTime}:00`).toISOString();
     const endIso = new Date(`${dateStr}T${endTime}:00`).toISOString();
-
-    // Guard: end must be after start
     if (new Date(endIso) <= new Date(startIso)) return;
 
     await addTimeEntry({
@@ -50,66 +44,64 @@ export function QuickEntryDrawer({ children }: { children: ReactNode }) {
       startTime: startIso,
       endTime: endIso,
       date: dateStr,
-      type: 'manual'
+      type: "manual",
     });
-
     setOpen(false);
   };
 
   return (
     <Drawer.Root open={open} onOpenChange={setOpen}>
-      <Drawer.Trigger asChild>
-        {children}
-      </Drawer.Trigger>
+      <Drawer.Trigger asChild>{children}</Drawer.Trigger>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50 backdrop-blur-sm" />
-        <Drawer.Content className="bg-card flex flex-col rounded-t-[2rem] h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-50 focus:outline-none">
-          <div className="p-4 bg-card flex-1 rounded-t-[2rem]">
-            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/30 mb-8" />
-            
-            <div className="max-w-md mx-auto px-2 pb-safe">
+        <Drawer.Content className="bg-card flex flex-col h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-50 focus:outline-none border-t-2 border-border">
+          <div className="p-5 bg-card flex-1 overflow-y-auto">
+            {/* Drawer handle */}
+            <div className="mx-auto w-12 h-0.5 flex-shrink-0 bg-muted-foreground/30 mb-8" />
+
+            <div className="max-w-md mx-auto">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold font-serif">Quick Entry</h2>
+                <h2 className="text-2xl font-bold uppercase tracking-tight">Quick Entry</h2>
                 <Drawer.Close asChild>
-                  <button className="p-2 rounded-full hover:bg-muted text-muted-foreground transition-colors">
-                    <X className="w-5 h-5" />
+                  <button className="w-9 h-9 border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors">
+                    <X className="w-4 h-4" />
                   </button>
                 </Drawer.Close>
               </div>
 
               <div className="space-y-6">
                 {/* Description */}
-                <div>
-                  <textarea
-                    autoFocus
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="What were you doing?"
-                    className="w-full bg-transparent border-none text-xl font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 resize-none"
-                    rows={2}
-                  />
-                </div>
+                <textarea
+                  autoFocus
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="What were you doing?"
+                  className="w-full bg-transparent border-none text-xl font-bold placeholder:text-muted-foreground/50 placeholder:font-normal focus:outline-none focus:ring-0 resize-none uppercase tracking-wide"
+                  rows={2}
+                />
 
-                {/* Categories */}
+                {/* Categories — square chips */}
                 <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 block">Category</label>
-                  <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar px-1 -mx-1">
-                    {categories.map(cat => {
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 block">
+                    Category
+                  </label>
+                  <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar -mx-1 px-1">
+                    {categories.map((cat) => {
                       const isSelected = categoryId === cat.id;
                       return (
                         <button
                           key={cat.id}
                           onClick={() => setCategoryId(cat.id!)}
                           className={clsx(
-                            "flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all duration-200 border",
-                            isSelected 
-                              ? "border-transparent text-white shadow-md scale-105" 
+                            "flex items-center gap-2 px-3 py-2 whitespace-nowrap text-xs font-bold uppercase tracking-wide transition-all border-2",
+                            isSelected
+                              ? "border-transparent text-white"
                               : "border-border bg-background text-foreground hover:bg-muted"
                           )}
                           style={isSelected ? { backgroundColor: cat.color } : {}}
                         >
                           {!isSelected && (
-                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                            <span className="w-2 h-2 flex-shrink-0" style={{ backgroundColor: cat.color }} />
                           )}
                           {cat.name}
                         </button>
@@ -118,40 +110,47 @@ export function QuickEntryDrawer({ children }: { children: ReactNode }) {
                   </div>
                 </div>
 
-                {/* Time Range */}
-                <div className="flex items-center gap-4 pt-2">
-                  <div className="flex-1 bg-background border rounded-xl p-3">
-                    <label className="text-xs text-muted-foreground block mb-1">From</label>
-                    <input 
-                      type="time" 
+                {/* Time Range — sharp bordered inputs */}
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="flex-1 bg-background border-2 border-border p-3">
+                    <label className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest block mb-1">
+                      From
+                    </label>
+                    <input
+                      type="time"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full bg-transparent text-lg font-mono font-medium focus:outline-none" 
+                      className="w-full bg-transparent text-lg font-mono font-bold focus:outline-none"
                     />
                   </div>
-                  <div className="w-4 h-[2px] bg-border" />
-                  <div className="flex-1 bg-background border rounded-xl p-3">
-                    <label className="text-xs text-muted-foreground block mb-1">To</label>
-                    <input 
-                      type="time" 
+                  {/* Bauhaus diagonal connector */}
+                  <div className="w-5 h-[2px] bg-border flex-shrink-0" />
+                  <div className="flex-1 bg-background border-2 border-border p-3">
+                    <label className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest block mb-1">
+                      To
+                    </label>
+                    <input
+                      type="time"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full bg-transparent text-lg font-mono font-medium focus:outline-none" 
+                      className="w-full bg-transparent text-lg font-mono font-bold focus:outline-none"
                     />
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="pt-6">
+                {/* Save */}
+                <div className="pt-4">
                   {startTime >= endTime && (
-                    <p className="text-destructive text-xs font-medium text-center mb-3">End time must be after start time</p>
+                    <p className="text-destructive text-xs font-bold uppercase tracking-wide text-center mb-3">
+                      End must be after start
+                    </p>
                   )}
                   <button
                     onClick={handleSave}
                     disabled={!categoryId || startTime >= endTime}
-                    className="w-full py-4 rounded-xl font-bold text-primary-foreground bg-primary disabled:opacity-50 hover:bg-primary/90 hover:scale-[1.02] active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2"
+                    className="w-full py-4 font-bold text-primary-foreground bg-primary disabled:opacity-50 hover:bg-primary/90 active:scale-95 transition-all border-2 border-primary flex items-center justify-center gap-2 uppercase tracking-wider"
                   >
-                    <Check className="w-5 h-5" /> Save Entry
+                    <Check className="w-5 h-5 stroke-[2.5]" /> Save Entry
                   </button>
                 </div>
               </div>
