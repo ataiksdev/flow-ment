@@ -127,15 +127,16 @@ export function useAddTimerSession() {
     const db = await initDB();
     await db.add('timerSessions', session as TimerSession);
     emitDbChange('timerSessions');
-    // Also add as a time entry for analytics
-    await db.add('timeEntries', {
+    // Mirror to timeEntries so Analytics and Timeline can display timer sessions
+    const mirroredEntry: TimeEntry = {
       description: session.label,
       categoryId: session.categoryId,
       startTime: session.startTime,
       endTime: session.endTime,
       date: session.date,
       type: session.mode === 'pomodoro' ? 'pomodoro' : 'manual',
-    } as any);
+    };
+    await db.add('timeEntries', mirroredEntry as TimeEntry);
     emitDbChange('timeEntries');
   }, []);
 }
