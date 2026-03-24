@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { format, addDays, subDays, parseISO, differenceInMinutes } from "date-fns";
-import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTimeEntries, useCategories, useSettings } from "@/hooks/useDB";
-import { Link } from "wouter";
 import { EditEntryDrawer } from "@/components/EditEntryDrawer";
 import type { TimeEntry } from "@/lib/db";
 
@@ -76,14 +75,9 @@ export default function Timeline() {
             {format(currentDate, "MMM d")}
           </p>
         </div>
-        <div className="flex gap-1">
-          <button onClick={() => navigateDay(1)} className="p-2 hover:bg-muted rounded-full">
-            <ChevronRight className="w-5 h-5" />
-          </button>
-          <Link href="/settings" className="p-2 hover:bg-muted rounded-full ml-2">
-            <Settings className="w-5 h-5 text-muted-foreground" />
-          </Link>
-        </div>
+        <button onClick={() => navigateDay(1)} className="p-2 hover:bg-muted rounded-full">
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </header>
 
       {/* Timeline Scroll Area */}

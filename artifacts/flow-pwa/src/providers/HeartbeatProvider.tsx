@@ -62,8 +62,9 @@ export function HeartbeatProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useHeartbeat = () => {
+// eslint-disable-next-line react-refresh/only-export-components
+export function useHeartbeat() {
   const ctx = useContext(HeartbeatContext);
   if (!ctx) throw new Error("useHeartbeat must be used within HeartbeatProvider");
   return ctx;
-};
+}

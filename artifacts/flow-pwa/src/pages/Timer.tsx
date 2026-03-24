@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Play, Pause, RotateCcw, Save } from "lucide-react";
 import { format } from "date-fns";
-import { useSettings, useCategories, useAddTimeEntry } from "@/hooks/useDB";
+import { useSettings, useCategories, useAddTimerSession } from "@/hooks/useDB";
 import { Drawer } from "vaul";
 import clsx from "clsx";
 
@@ -11,7 +11,7 @@ type PomodoroType = "focus" | "shortBreak" | "longBreak";
 export default function Timer() {
   const settings = useSettings();
   const categories = useCategories();
-  const addTimeEntry = useAddTimeEntry();
+  const addTimerSession = useAddTimerSession();
 
   const [mode, setMode] = useState<TimerMode>("pomodoro");
   const [pomoType, setPomodoroType] = useState<PomodoroType>("focus");
@@ -86,19 +86,19 @@ export default function Timer() {
   const saveSession = async () => {
     if (!categoryId) return;
     const end = new Date();
-    // For stopwatch: timeLeft = elapsed seconds (counts up from 0)
-    // For pomodoro: totalDuration = session length in seconds
     const durationSecs = mode === "pomodoro" ? totalDuration : timeLeft;
-    if (durationSecs <= 0) return; // guard: nothing to save
+    if (durationSecs <= 0) return;
     const start = new Date(end.getTime() - durationSecs * 1000);
+    const label = sessionLabel || (mode === "pomodoro" ? "Pomodoro Session" : "Stopwatch Session");
     
-    await addTimeEntry({
-      description: sessionLabel || (mode === "pomodoro" ? "Pomodoro Session" : "Stopwatch Session"),
+    await addTimerSession({
+      label,
       categoryId,
+      mode,
+      durationSecs,
       startTime: start.toISOString(),
       endTime: end.toISOString(),
       date: format(end, "yyyy-MM-dd"),
-      type: mode === "pomodoro" ? 'pomodoro' : 'manual'
     });
     setDrawerOpen(false);
     resetTimer();

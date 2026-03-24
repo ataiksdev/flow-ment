@@ -12,16 +12,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-background text-foreground overflow-hidden relative">
+    <div className="flex flex-col h-[100dvh] w-full bg-background text-foreground overflow-hidden">
       {/* Offline Indicator */}
       {!isOnline && (
         <div className="bg-destructive text-destructive-foreground text-xs py-1 text-center font-medium z-50">
@@ -30,27 +30,26 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto relative" style={{ paddingBottom: '5rem' }}>
+      <main className="flex-1 overflow-y-auto relative" style={{ paddingBottom: "5rem" }}>
         {children}
       </main>
 
       {/* Heartbeat Overlay */}
       <HeartbeatBanner />
 
-      {/* Bottom Navigation bar (relative positioned, FAB floats above it) */}
-      <div className="relative flex-shrink-0">
-        {/* Floating Action Button */}
-        <QuickEntryDrawer>
-          <button
-            className="absolute -top-7 left-1/2 -translate-x-1/2 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
-            data-testid="fab-quick-entry"
-          >
-            <Plus className="w-7 h-7" />
-          </button>
-        </QuickEntryDrawer>
+      {/* Bottom Navigation */}
+      <BottomNav currentPath={location} />
 
-        <BottomNav currentPath={location} />
-      </div>
+      {/* Floating Action Button — pinned above bottom nav */}
+      <QuickEntryDrawer>
+        <button
+          className="fixed bottom-[5.5rem] left-1/2 -translate-x-1/2 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+          data-testid="fab-quick-entry"
+          aria-label="Quick Entry"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+      </QuickEntryDrawer>
     </div>
   );
 }

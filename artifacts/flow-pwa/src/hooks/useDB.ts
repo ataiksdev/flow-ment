@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   initDB, emitDbChange, dbEvents, 
-  TimeEntry, Category, Habit, HabitLog, Heartbeat, Setting 
+  TimeEntry, TimerSession, Category, Habit, HabitLog, Heartbeat, Setting 
 } from '@/lib/db';
 import { format } from 'date-fns';
 
@@ -111,6 +111,35 @@ export function useDeleteTimeEntry() {
   }, []);
 }
 
+// --- Timer Sessions ---
+export function useTimerSessions(date?: string) {
+  return useLiveQuery('timerSessions', async () => {
+    const db = await initDB();
+    if (date) {
+      return db.getAllFromIndex('timerSessions', 'by-date', date);
+    }
+    return db.getAll('timerSessions');
+  }, [date]) || [];
+}
+
+export function useAddTimerSession() {
+  return useCallback(async (session: Omit<TimerSession, 'id'>) => {
+    const db = await initDB();
+    await db.add('timerSessions', session as TimerSession);
+    emitDbChange('timerSessions');
+    // Also add as a time entry for analytics
+    await db.add('timeEntries', {
+      description: session.label,
+      categoryId: session.categoryId,
+      startTime: session.startTime,
+      endTime: session.endTime,
+      date: session.date,
+      type: session.mode === 'pomodoro' ? 'pomodoro' : 'manual',
+    } as any);
+    emitDbChange('timeEntries');
+  }, []);
+}
+
 // --- Habits ---
 export function useHabits() {
   return useLiveQuery('habits', async () => {
@@ -135,7 +164,18 @@ export function useUpdateHabit() {
     if (h) {
       await db.put('habits', { ...h, ...updates });
       emitDbChange('habits');
-      emitDbChange('habitLogs'); // in case it affects logs visually
+      emitDbChange('habitLogs');
+    }
+  }, []);
+}
+
+export function useDeleteHabit() {
+  return useCallback(async (id: number) => {
+    const db = await initDB();
+    const h = await db.get('habits', id);
+    if (h) {
+      await db.put('habits', { ...h, archived: true });
+      emitDbChange('habits');
     }
   }, []);
 }
