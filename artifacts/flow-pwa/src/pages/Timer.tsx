@@ -86,12 +86,14 @@ export default function Timer() {
   const saveSession = async () => {
     if (!categoryId) return;
     const end = new Date();
-    // For stopwatch, calculate start from duration. For pomodoro, use totalDuration
+    // For stopwatch: timeLeft = elapsed seconds (counts up from 0)
+    // For pomodoro: totalDuration = session length in seconds
     const durationSecs = mode === "pomodoro" ? totalDuration : timeLeft;
+    if (durationSecs <= 0) return; // guard: nothing to save
     const start = new Date(end.getTime() - durationSecs * 1000);
     
     await addTimeEntry({
-      description: sessionLabel,
+      description: sessionLabel || (mode === "pomodoro" ? "Pomodoro Session" : "Stopwatch Session"),
       categoryId,
       startTime: start.toISOString(),
       endTime: end.toISOString(),

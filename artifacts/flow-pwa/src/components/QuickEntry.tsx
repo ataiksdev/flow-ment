@@ -41,8 +41,11 @@ export function QuickEntryDrawer({ children }: { children: ReactNode }) {
     const startIso = new Date(`${dateStr}T${startTime}:00`).toISOString();
     const endIso = new Date(`${dateStr}T${endTime}:00`).toISOString();
 
+    // Guard: end must be after start
+    if (new Date(endIso) <= new Date(startIso)) return;
+
     await addTimeEntry({
-      description,
+      description: description.trim() || "Untitled",
       categoryId,
       startTime: startIso,
       endTime: endIso,
@@ -140,9 +143,12 @@ export function QuickEntryDrawer({ children }: { children: ReactNode }) {
 
                 {/* Actions */}
                 <div className="pt-6">
+                  {startTime >= endTime && (
+                    <p className="text-destructive text-xs font-medium text-center mb-3">End time must be after start time</p>
+                  )}
                   <button
                     onClick={handleSave}
-                    disabled={!description.trim() || !categoryId}
+                    disabled={!categoryId || startTime >= endTime}
                     className="w-full py-4 rounded-xl font-bold text-primary-foreground bg-primary disabled:opacity-50 hover:bg-primary/90 hover:scale-[1.02] active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2"
                   >
                     <Check className="w-5 h-5" /> Save Entry
