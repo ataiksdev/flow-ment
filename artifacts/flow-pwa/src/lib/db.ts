@@ -70,6 +70,26 @@ export interface Composition {
   createdAt: string;
 }
 
+export interface PlanTask {
+  id?: number;
+  title: string;
+  quadrant: 0 | 1 | 2 | 3 | 4; // 0 = backlog
+  categoryId?: number;
+  durationMinutes: number;
+  date: string;
+  scheduled: boolean;
+  completed: boolean;
+}
+
+export interface Goal {
+  id?: number;
+  name: string;
+  color: string;
+  weeklyTargetMinutes: number;
+  linkedCategoryIds: number[];
+  createdAt: string;
+}
+
 interface FlowDB extends DBSchema {
   timeEntries: {
     key: number;
@@ -107,10 +127,19 @@ interface FlowDB extends DBSchema {
     key: number;
     value: Composition;
   };
+  planTasks: {
+    key: number;
+    value: PlanTask;
+    indexes: { 'by-date': string };
+  };
+  goals: {
+    key: number;
+    value: Goal;
+  };
 }
 
 const DB_NAME = 'flow-pwa';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let dbPromise: Promise<IDBPDatabase<FlowDB>> | null = null;
 
@@ -169,6 +198,13 @@ export async function initDB() {
         }
         if (!db.objectStoreNames.contains('compositions')) {
           db.createObjectStore('compositions', { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains('planTasks')) {
+          const store = db.createObjectStore('planTasks', { keyPath: 'id', autoIncrement: true });
+          store.createIndex('by-date', 'date');
+        }
+        if (!db.objectStoreNames.contains('goals')) {
+          db.createObjectStore('goals', { keyPath: 'id', autoIncrement: true });
         }
       },
     }).then(async (db) => {

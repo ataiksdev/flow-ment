@@ -14,6 +14,7 @@ const Timer = lazy(() => import("@/pages/Timer"));
 const Habits = lazy(() => import("@/pages/Habits"));
 const Analytics = lazy(() => import("@/pages/Analytics"));
 const Settings = lazy(() => import("@/pages/Settings"));
+const Plan = lazy(() => import("@/pages/Plan"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ function Router() {
         <Route path="/habits" component={Habits} />
         <Route path="/analytics" component={Analytics} />
         <Route path="/settings" component={Settings} />
+        <Route path="/plan" component={Plan} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

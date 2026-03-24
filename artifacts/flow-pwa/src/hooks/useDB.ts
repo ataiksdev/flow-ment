@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   initDB, emitDbChange, dbEvents, 
-  TimeEntry, TimerSession, Category, Habit, HabitLog, Heartbeat, Setting, Composition
+  TimeEntry, TimerSession, Category, Habit, HabitLog, Heartbeat, Setting, Composition, PlanTask, Goal
 } from '@/lib/db';
 import { format } from 'date-fns';
 
@@ -283,5 +283,76 @@ export function useDeleteComposition() {
     const db = await initDB();
     await db.delete('compositions', id);
     emitDbChange('compositions');
+  }, []);
+}
+
+// --- Plan Tasks ---
+export function usePlanTasks(date?: string) {
+  return useLiveQuery('planTasks', async () => {
+    const db = await initDB();
+    if (date) return db.getAllFromIndex('planTasks', 'by-date', date);
+    return db.getAll('planTasks');
+  }, [date]) || [];
+}
+
+export function useAddPlanTask() {
+  return useCallback(async (task: Omit<PlanTask, 'id'>) => {
+    const db = await initDB();
+    await db.add('planTasks', task as PlanTask);
+    emitDbChange('planTasks');
+  }, []);
+}
+
+export function useUpdatePlanTask() {
+  return useCallback(async (id: number, updates: Partial<PlanTask>) => {
+    const db = await initDB();
+    const task = await db.get('planTasks', id);
+    if (task) {
+      await db.put('planTasks', { ...task, ...updates });
+      emitDbChange('planTasks');
+    }
+  }, []);
+}
+
+export function useDeletePlanTask() {
+  return useCallback(async (id: number) => {
+    const db = await initDB();
+    await db.delete('planTasks', id);
+    emitDbChange('planTasks');
+  }, []);
+}
+
+// --- Goals ---
+export function useGoals() {
+  return useLiveQuery('goals', async () => {
+    const db = await initDB();
+    return db.getAll('goals');
+  }) || [];
+}
+
+export function useAddGoal() {
+  return useCallback(async (goal: Omit<Goal, 'id'>) => {
+    const db = await initDB();
+    await db.add('goals', goal as Goal);
+    emitDbChange('goals');
+  }, []);
+}
+
+export function useUpdateGoal() {
+  return useCallback(async (id: number, updates: Partial<Goal>) => {
+    const db = await initDB();
+    const g = await db.get('goals', id);
+    if (g) {
+      await db.put('goals', { ...g, ...updates });
+      emitDbChange('goals');
+    }
+  }, []);
+}
+
+export function useDeleteGoal() {
+  return useCallback(async (id: number) => {
+    const db = await initDB();
+    await db.delete('goals', id);
+    emitDbChange('goals');
   }, []);
 }

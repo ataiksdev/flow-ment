@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { format, addDays, subDays, parseISO, differenceInMinutes } from "date-fns";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useTimeEntries, useCategories, useSettings } from "@/hooks/useDB";
+import { ChevronLeft, ChevronRight, X, Check } from "lucide-react";
+import { useTimeEntries, useCategories, useSettings, useUpdateSetting } from "@/hooks/useDB";
 import { EditEntryDrawer } from "@/components/EditEntryDrawer";
 import type { TimeEntry } from "@/lib/db";
 import { Drawer } from "vaul";
@@ -48,6 +48,40 @@ export default function Timeline() {
   const entries = useTimeEntries(dateStr);
   const categories = useCategories();
   const settings = useSettings();
+  const updateSetting = useUpdateSetting();
+
+  // Frog of the Day
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const hasMountedFrog = useRef(false);
+  const [showFrogModal, setShowFrogModal] = useState(false);
+  const [frogInput, setFrogInput] = useState("");
+
+  const frogDate: string | undefined = settings.frogDate;
+  const frogText: string | undefined = settings.frogText;
+  const frogDone: boolean = settings.frogDone === true;
+
+  useEffect(() => {
+    if (hasMountedFrog.current) return;
+    if (Object.keys(settings).length === 0) return; // wait for settings to load
+    hasMountedFrog.current = true;
+    // Show modal if today's frog hasn't been set
+    if (frogDate !== todayStr) {
+      setShowFrogModal(true);
+    }
+  }, [settings, frogDate, todayStr]);
+
+  const saveFrog = async () => {
+    if (!frogInput.trim()) return;
+    await updateSetting("frogDate", todayStr);
+    await updateSetting("frogText", frogInput.trim());
+    await updateSetting("frogDone", false);
+    setShowFrogModal(false);
+    setFrogInput("");
+  };
+
+  const toggleFrogDone = async () => {
+    await updateSetting("frogDone", !frogDone);
+  };
 
   const navigateDay = (dir: number) => {
     setCurrentDate((prev) => (dir > 0 ? addDays(prev, 1) : subDays(prev, 1)));
@@ -186,6 +220,37 @@ export default function Timeline() {
         </div>
       </header>
 
+      {/* Frog of the Day Banner */}
+      {frogDate === todayStr && frogText && (
+        <div
+          className="flex items-center gap-3 px-4 py-2.5 border-b-2 border-border flex-shrink-0"
+          style={{ backgroundColor: frogDone ? "hsl(var(--muted))" : "hsl(35 90% 15%)" }}
+        >
+          <button
+            onClick={toggleFrogDone}
+            className="w-5 h-5 border-2 flex items-center justify-center flex-shrink-0 transition-all"
+            style={{ borderColor: frogDone ? "hsl(var(--muted-foreground))" : "hsl(35 90% 55%)" }}
+          >
+            {frogDone && <Check className="w-3 h-3" style={{ color: "hsl(var(--muted-foreground))" }} />}
+          </button>
+          <div className="flex-1 min-w-0">
+            <p className="text-[8px] font-bold uppercase tracking-widest mb-0.5"
+              style={{ color: frogDone ? "hsl(var(--muted-foreground))" : "hsl(35 90% 60%)" }}>
+              Frog of the Day
+            </p>
+            <p className={`text-xs font-bold uppercase tracking-wide truncate ${frogDone ? "line-through text-muted-foreground" : "text-foreground"}`}>
+              {frogText}
+            </p>
+          </div>
+          <button
+            onClick={() => { setFrogInput(""); setShowFrogModal(true); }}
+            className="text-[8px] font-bold text-muted-foreground hover:text-foreground uppercase tracking-wide flex-shrink-0 px-2 py-1 border border-border/50"
+          >
+            Change
+          </button>
+        </div>
+      )}
+
       {/* 4×6 Hour Grid */}
       <div className="flex-1 overflow-y-auto p-2">
         <div className="grid grid-cols-4 gap-[2px]" style={{ background: "hsl(var(--border))" }}>
@@ -319,6 +384,49 @@ export default function Timeline() {
           })}
         </div>
       </div>
+
+      {/* Frog of the Day Modal */}
+      <Drawer.Root open={showFrogModal} onOpenChange={(open) => !open && setShowFrogModal(false)}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm" />
+          <Drawer.Content className="bg-card flex flex-col fixed bottom-0 left-0 right-0 z-50 pb-10 px-6 pt-5 border-t-2 border-border">
+            <div className="mx-auto w-12 h-0.5 bg-muted-foreground/30 mb-6" />
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-3xl">🐸</span>
+                <h2 className="text-2xl font-bold uppercase tracking-tight">Frog of the Day</h2>
+              </div>
+              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide">
+                "Eat the frog" — your most important task today
+              </p>
+            </div>
+            <input
+              autoFocus
+              type="text"
+              value={frogInput}
+              onChange={(e) => setFrogInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && saveFrog()}
+              placeholder="What must you do today above all else?"
+              className="w-full bg-background border-2 border-border px-4 py-4 text-base font-bold focus:outline-none focus:border-primary mb-3 uppercase tracking-wide placeholder:text-muted-foreground/40 placeholder:normal-case"
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={saveFrog}
+                disabled={!frogInput.trim()}
+                className="flex-1 py-4 font-bold text-primary-foreground bg-primary disabled:opacity-50 transition-all border-2 border-primary uppercase tracking-wider"
+              >
+                Set Frog
+              </button>
+              <button
+                onClick={() => setShowFrogModal(false)}
+                className="w-14 py-4 border-2 border-border font-bold text-muted-foreground hover:bg-muted uppercase tracking-wider text-xs"
+              >
+                Skip
+              </button>
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
 
       {/* Edit Entry Drawer */}
       <EditEntryDrawer entry={editingEntry} onClose={() => setEditingEntry(null)} />

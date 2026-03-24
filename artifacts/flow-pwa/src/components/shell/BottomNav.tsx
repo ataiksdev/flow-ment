@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Clock, Timer, Layers, BarChart2, Settings } from "lucide-react";
+import { Clock, Timer, Layers, BarChart2, CalendarDays } from "lucide-react";
 import clsx from "clsx";
 
 interface BottomNavProps {
@@ -11,8 +11,8 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
     { name: "Timeline", path: "/", icon: Clock },
     { name: "Timer", path: "/timer", icon: Timer },
     { name: "Compose", path: "/habits", icon: Layers },
+    { name: "Plan", path: "/plan", icon: CalendarDays },
     { name: "Analytics", path: "/analytics", icon: BarChart2 },
-    { name: "Settings", path: "/settings", icon: Settings },
   ];
 
   return (
