@@ -8,6 +8,7 @@ export interface TimeEntry {
   endTime: string; // ISO
   date: string; // YYYY-MM-DD
   type: 'manual' | 'pomodoro' | 'heartbeat';
+  ongoing?: boolean;
 }
 
 export interface TimerSession {
@@ -55,6 +56,20 @@ export interface Setting {
   value: any;
 }
 
+export interface CompositionBlock {
+  label: string;
+  categoryId: number;
+  durationMinutes: number;
+}
+
+export interface Composition {
+  id?: number;
+  name: string;
+  color: string;
+  blocks: CompositionBlock[];
+  createdAt: string;
+}
+
 interface FlowDB extends DBSchema {
   timeEntries: {
     key: number;
@@ -88,10 +103,14 @@ interface FlowDB extends DBSchema {
     key: string;
     value: Setting;
   };
+  compositions: {
+    key: number;
+    value: Composition;
+  };
 }
 
 const DB_NAME = 'flow-pwa';
-const DB_VERSION = 2; // bumped to add timerSessions store
+const DB_VERSION = 3;
 
 let dbPromise: Promise<IDBPDatabase<FlowDB>> | null = null;
 
@@ -148,9 +167,11 @@ export async function initDB() {
         if (!db.objectStoreNames.contains('settings')) {
           db.createObjectStore('settings', { keyPath: 'key' });
         }
+        if (!db.objectStoreNames.contains('compositions')) {
+          db.createObjectStore('compositions', { keyPath: 'id', autoIncrement: true });
+        }
       },
     }).then(async (db) => {
-      // Seed default categories
       const tx = db.transaction(['categories', 'settings'], 'readwrite');
       const cats = await tx.objectStore('categories').getAll();
       if (cats.length === 0) {
@@ -158,7 +179,6 @@ export async function initDB() {
           await tx.objectStore('categories').add(c);
         }
       }
-      // Seed default settings (only missing keys)
       const existingSettings = await tx.objectStore('settings').getAll();
       const existingKeys = new Set(existingSettings.map(s => s.key));
       for (const s of DEFAULT_SETTINGS) {
@@ -173,7 +193,6 @@ export async function initDB() {
   return dbPromise;
 }
 
-// Global EventTarget to trigger React re-renders on DB changes
 export const dbEvents = new EventTarget();
 
 export function emitDbChange(storeName: keyof FlowDB | 'all') {
@@ -183,38 +202,30 @@ export function emitDbChange(storeName: keyof FlowDB | 'all') {
   }
 }
 
-// Data Export/Import
 export async function exportAllData() {
   const db = await initDB();
-  const stores: (keyof FlowDB)[] = ['timeEntries', 'timerSessions', 'categories', 'habits', 'habitLogs', 'heartbeats', 'settings'];
+  const stores: (keyof FlowDB)[] = ['timeEntries', 'timerSessions', 'categories', 'habits', 'habitLogs', 'heartbeats', 'settings', 'compositions'];
   const exportData: Record<string, any[]> = {};
-  
   for (const storeName of stores) {
     exportData[storeName] = await db.getAll(storeName);
   }
-  
   return JSON.stringify(exportData, null, 2);
 }
 
 export async function importAllData(jsonString: string, mode: 'merge' | 'replace') {
   const data = JSON.parse(jsonString);
   const db = await initDB();
-  const stores: (keyof FlowDB)[] = ['timeEntries', 'timerSessions', 'categories', 'habits', 'habitLogs', 'heartbeats', 'settings'];
-  
+  const stores: (keyof FlowDB)[] = ['timeEntries', 'timerSessions', 'categories', 'habits', 'habitLogs', 'heartbeats', 'settings', 'compositions'];
   const tx = db.transaction(stores, 'readwrite');
-  
   for (const storeName of stores) {
     if (data[storeName] && Array.isArray(data[storeName])) {
       const store = tx.objectStore(storeName);
-      if (mode === 'replace') {
-        await store.clear();
-      }
+      if (mode === 'replace') await store.clear();
       for (const item of data[storeName]) {
         await store.put(item);
       }
     }
   }
-  
   await tx.done;
   emitDbChange('all');
 }

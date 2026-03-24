@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { format, parseISO, differenceInSeconds } from "date-fns";
 import { useTimeEntries, useCategories } from "@/hooks/useDB";
+import { useTimerContext } from "@/providers/TimerContext";
 import { QuickEntryDrawer } from "./QuickEntry";
-import { Plus, Zap, Clock } from "lucide-react";
+import { Plus, Zap, Clock, Focus } from "lucide-react";
 
 function formatElapsed(secs: number): string {
   const h = Math.floor(secs / 3600);
@@ -16,9 +17,9 @@ export function NowBar() {
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const entries = useTimeEntries(todayStr);
   const categories = useCategories();
+  const { isTimerRunning, timerLabel } = useTimerContext();
   const [tick, setTick] = useState(0);
 
-  // Tick every second to update timer
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(id);
@@ -56,16 +57,49 @@ export function NowBar() {
     if (activeEntry) {
       return Math.max(0, differenceInSeconds(now, parseISO(activeEntry.startTime)));
     }
+    if (isTimerRunning) return 0;
     return Math.max(0, differenceInSeconds(now, parseISO(lastEntry!.endTime)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick, displayEntry, activeEntry, lastEntry]);
+  }, [tick, displayEntry, activeEntry, lastEntry, isTimerRunning]);
 
   const isActive = !!activeEntry;
   const accentColor = displayCat?.color ?? "hsl(var(--muted-foreground))";
 
+  // If timer is running, show a compact focus indicator
+  if (isTimerRunning) {
+    return (
+      <div className="flex items-stretch bg-card border-t-2 border-border h-14 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary" />
+        <div className="w-1 self-stretch flex-shrink-0 bg-primary" />
+        <div className="flex-1 min-w-0 flex flex-col justify-center px-3">
+          <div className="flex items-center gap-1.5">
+            <Focus className="w-2.5 h-2.5 text-primary flex-shrink-0" />
+            <span className="text-[9px] font-bold uppercase tracking-widest text-primary">
+              Focus Session
+            </span>
+          </div>
+          <div className="text-sm font-bold truncate leading-tight mt-0.5">
+            {timerLabel || "Pomodoro"}
+          </div>
+        </div>
+        <div className="flex items-center px-3 flex-shrink-0">
+          <QuickEntryDrawer>
+            <button
+              className="w-10 h-10 bg-primary text-primary-foreground flex items-center justify-center hover:scale-105 active:scale-95 transition-transform border-2 border-foreground/10"
+              style={{ borderRadius: "50%" }}
+              data-testid="fab-quick-entry"
+              aria-label="Quick Entry"
+            >
+              <Plus className="w-5 h-5 stroke-[2.5]" />
+            </button>
+          </QuickEntryDrawer>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-stretch bg-card border-t-2 border-border h-14 relative overflow-hidden">
-      {/* Thin coloured top strip — matches category */}
       <div
         className="absolute top-0 left-0 right-0 h-[3px]"
         style={{ backgroundColor: accentColor, opacity: displayEntry ? 1 : 0.3 }}
@@ -73,13 +107,10 @@ export function NowBar() {
 
       {displayEntry ? (
         <>
-          {/* Category accent bar */}
           <div
             className="w-1 self-stretch flex-shrink-0"
             style={{ backgroundColor: accentColor }}
           />
-
-          {/* Activity info */}
           <div className="flex-1 min-w-0 flex flex-col justify-center px-3">
             <div className="flex items-center gap-1.5">
               {isActive ? (
@@ -96,7 +127,6 @@ export function NowBar() {
             </div>
           </div>
 
-          {/* Live timer */}
           <div className="flex flex-col items-end justify-center px-3 flex-shrink-0">
             <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
               {isActive ? "Elapsed" : "Idle"}
@@ -117,7 +147,6 @@ export function NowBar() {
         </div>
       )}
 
-      {/* FAB — Bauhaus circle embedded in bar */}
       <div className="flex items-center px-3 flex-shrink-0">
         <QuickEntryDrawer>
           <button

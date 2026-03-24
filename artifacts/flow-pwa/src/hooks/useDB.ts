@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   initDB, emitDbChange, dbEvents, 
-  TimeEntry, TimerSession, Category, Habit, HabitLog, Heartbeat, Setting 
+  TimeEntry, TimerSession, Category, Habit, HabitLog, Heartbeat, Setting, Composition
 } from '@/lib/db';
 import { format } from 'date-fns';
 
@@ -248,5 +248,40 @@ export function useUpdateSetting() {
     const db = await initDB();
     await db.put('settings', { key, value });
     emitDbChange('settings');
+  }, []);
+}
+
+// --- Compositions ---
+export function useCompositions() {
+  return useLiveQuery('compositions', async () => {
+    const db = await initDB();
+    return db.getAll('compositions');
+  }) || [];
+}
+
+export function useAddComposition() {
+  return useCallback(async (comp: Omit<Composition, 'id'>) => {
+    const db = await initDB();
+    await db.add('compositions', comp as Composition);
+    emitDbChange('compositions');
+  }, []);
+}
+
+export function useUpdateComposition() {
+  return useCallback(async (id: number, updates: Partial<Composition>) => {
+    const db = await initDB();
+    const comp = await db.get('compositions', id);
+    if (comp) {
+      await db.put('compositions', { ...comp, ...updates });
+      emitDbChange('compositions');
+    }
+  }, []);
+}
+
+export function useDeleteComposition() {
+  return useCallback(async (id: number) => {
+    const db = await initDB();
+    await db.delete('compositions', id);
+    emitDbChange('compositions');
   }, []);
 }

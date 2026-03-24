@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Clock, Timer, CheckSquare, BarChart2, Settings } from "lucide-react";
+import { Clock, Timer, Layers, BarChart2, Settings } from "lucide-react";
 import clsx from "clsx";
 
 interface BottomNavProps {
@@ -10,7 +10,7 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
   const navItems = [
     { name: "Timeline", path: "/", icon: Clock },
     { name: "Timer", path: "/timer", icon: Timer },
-    { name: "Habits", path: "/habits", icon: CheckSquare },
+    { name: "Compose", path: "/habits", icon: Layers },
     { name: "Analytics", path: "/analytics", icon: BarChart2 },
     { name: "Settings", path: "/settings", icon: Settings },
   ];
@@ -34,11 +34,9 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
               )}
               data-testid={`nav-${item.name.toLowerCase()}`}
             >
-              {/* Bauhaus top-line active indicator */}
               {isActive && (
                 <span className="absolute top-0 left-0 right-0 h-[3px] bg-primary" />
               )}
-
               <Icon
                 className={clsx(
                   "w-[18px] h-[18px] transition-colors duration-150",

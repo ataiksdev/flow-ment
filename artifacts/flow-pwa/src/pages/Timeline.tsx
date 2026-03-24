@@ -1,14 +1,14 @@
 import { useState, useMemo } from "react";
 import { format, addDays, subDays, parseISO, differenceInMinutes } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useTimeEntries, useCategories, useSettings } from "@/hooks/useDB";
 import { EditEntryDrawer } from "@/components/EditEntryDrawer";
 import type { TimeEntry } from "@/lib/db";
+import { Drawer } from "vaul";
 
-// Colour tint for each time-of-day period (matches CSS variables in index.css)
 function getHourBg(hour: number): string {
   if (hour >= 21 || hour < 5) return "var(--hour-night)";
-  if (hour >= 5 && hour < 8)  return "var(--hour-dawn)";
+  if (hour >= 5 && hour < 8) return "var(--hour-dawn)";
   if (hour >= 8 && hour < 13) return "var(--hour-morning)";
   if (hour >= 13 && hour < 18) return "var(--hour-afternoon)";
   return "var(--hour-evening)";
@@ -31,12 +31,18 @@ function entrySegmentForHour(entry: TimeEntry, hour: number) {
   return {
     topPct: (cellStartMin / 60) * 100,
     heightPct: ((cellEndMin - cellStartMin) / 60) * 100,
+    minutesInCell: cellEndMin - cellStartMin,
   };
+}
+
+function fmtTime(iso: string) {
+  return format(parseISO(iso), "HH:mm");
 }
 
 export default function Timeline() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
+  const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const dateStr = format(currentDate, "yyyy-MM-dd");
 
   const entries = useTimeEntries(dateStr);
@@ -61,6 +67,18 @@ export default function Timeline() {
   const activeHours = Math.max(1, wakeEndH - wakeStartH);
   const activeMinutes = activeHours * 60;
 
+  // Minutes tracked per hour (for font-size data viz)
+  const hourMinutes = useMemo(() => {
+    const map: Record<number, number> = {};
+    for (let h = 0; h < 24; h++) {
+      map[h] = entries.reduce((acc, e) => {
+        const seg = entrySegmentForHour(e, h);
+        return acc + (seg ? seg.minutesInCell : 0);
+      }, 0);
+    }
+    return map;
+  }, [entries]);
+
   const categoryTotals = useMemo(() => {
     return categories
       .map((cat) => {
@@ -83,6 +101,23 @@ export default function Timeline() {
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
+  // Entries in selected hour for the detail drawer
+  const hourDetailEntries = useMemo(() => {
+    if (selectedHour === null) return [];
+    return entries
+      .map((e) => {
+        const seg = entrySegmentForHour(e, selectedHour);
+        if (!seg) return null;
+        const cat = categories.find((c) => c.id === e.categoryId);
+        return { entry: e, seg, cat };
+      })
+      .filter(Boolean) as {
+        entry: TimeEntry;
+        seg: { topPct: number; heightPct: number; minutesInCell: number };
+        cat: (typeof categories)[0] | undefined;
+      }[];
+  }, [selectedHour, entries, categories]);
+
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
@@ -94,7 +129,6 @@ export default function Timeline() {
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-
           <div className="text-center">
             <h1 className="font-bold text-xl tracking-tight leading-tight uppercase">
               {format(currentDate, "EEEE")}
@@ -103,7 +137,6 @@ export default function Timeline() {
               {format(currentDate, "MMM d")}
             </p>
           </div>
-
           <button
             onClick={() => navigateDay(1)}
             className="w-9 h-9 flex items-center justify-center border border-border hover:bg-muted transition-colors"
@@ -112,39 +145,34 @@ export default function Timeline() {
           </button>
         </div>
 
-        {/* Day progress bar */}
+        {/* Day progress bar with time-period colour segments */}
         <div className="px-4 pb-3">
           <div className="relative h-2 w-full border border-border overflow-hidden" style={{ backgroundColor: "var(--hour-night)" }}>
-            {/* Colour segments by time period across the bar */}
             <div className="absolute inset-0 flex">
               {[
-                { pct: 5/24*100, color: "var(--hour-night)" },
-                { pct: 3/24*100, color: "var(--hour-dawn)" },
-                { pct: 5/24*100, color: "var(--hour-morning)" },
-                { pct: 5/24*100, color: "var(--hour-afternoon)" },
-                { pct: 4/24*100, color: "var(--hour-evening)" },
-                { pct: 2/24*100, color: "var(--hour-night)" },
+                { pct: (5/24)*100, color: "var(--hour-night)" },
+                { pct: (3/24)*100, color: "var(--hour-dawn)" },
+                { pct: (5/24)*100, color: "var(--hour-morning)" },
+                { pct: (5/24)*100, color: "var(--hour-afternoon)" },
+                { pct: (4/24)*100, color: "var(--hour-evening)" },
+                { pct: (2/24)*100, color: "var(--hour-night)" },
               ].map((seg, i) => (
                 <div key={i} style={{ width: `${seg.pct}%`, backgroundColor: seg.color }} />
               ))}
             </div>
-            {/* Progress overlay */}
             {isToday && (
-              <div
-                className="absolute left-0 top-0 h-full bg-foreground/20 transition-all duration-1000"
-                style={{ width: `${dayProgressPct}%` }}
-              />
+              <>
+                <div
+                  className="absolute left-0 top-0 h-full bg-foreground/20 transition-all duration-1000"
+                  style={{ width: `${dayProgressPct}%` }}
+                />
+                <div
+                  className="absolute top-0 h-full w-[3px] bg-primary z-10"
+                  style={{ left: `${dayProgressPct}%` }}
+                />
+              </>
             )}
-            {/* Current time tick */}
-            {isToday && (
-              <div
-                className="absolute top-0 h-full w-[3px] bg-primary z-10"
-                style={{ left: `${dayProgressPct}%` }}
-              />
-            )}
-            {isPast && (
-              <div className="absolute inset-0 bg-muted-foreground/30" />
-            )}
+            {isPast && <div className="absolute inset-0 bg-muted-foreground/30" />}
           </div>
           {isToday && (
             <div className="flex justify-between mt-1">
@@ -164,7 +192,6 @@ export default function Timeline() {
           {hours.map((hour) => {
             const isCurrentHour = isToday && hour === nowHour;
             const isElapsed = isToday && hour < nowHour;
-            // Past entire day = all hours elasped
             const cellIsElapsed = isPast || isElapsed;
 
             const hourEntries = entries
@@ -176,43 +203,47 @@ export default function Timeline() {
               })
               .filter(Boolean) as {
                 entry: TimeEntry;
-                seg: { topPct: number; heightPct: number };
+                seg: { topPct: number; heightPct: number; minutesInCell: number };
                 cat: (typeof categories)[0] | undefined;
               }[];
 
-            const bgColor = getHourBg(hour);
+            // Font size as data visualization: 10px (empty) → 22px (full hour tracked)
+            const trackedMins = hourMinutes[hour] || 0;
+            const hourLabelSize = 10 + Math.round((trackedMins / 60) * 12);
 
             return (
               <div
                 key={hour}
-                className="relative overflow-hidden transition-all"
+                className="relative overflow-hidden transition-all cursor-pointer"
                 style={{
                   height: isCurrentHour ? 88 : 72,
-                  backgroundColor: bgColor,
-                  // Past hours: fade to gray
+                  backgroundColor: getHourBg(hour),
                   filter: cellIsElapsed ? "grayscale(0.6)" : undefined,
                   opacity: cellIsElapsed ? 0.45 : 1,
-                  // Current hour: strong border highlight
                   outline: isCurrentHour ? "2px solid hsl(var(--primary))" : undefined,
                   outlineOffset: isCurrentHour ? "-2px" : undefined,
                   zIndex: isCurrentHour ? 2 : undefined,
                 }}
+                onClick={() => setSelectedHour(hour)}
               >
-                {/* Hour label */}
+                {/* Hour label — size encodes logged intensity */}
                 <span
                   style={{
                     position: "absolute",
-                    top: 6,
-                    left: 8,
-                    fontSize: isCurrentHour ? 13 : 10,
+                    top: 5,
+                    left: 7,
+                    fontSize: hourLabelSize,
                     fontFamily: "Space Mono, monospace",
                     fontWeight: 700,
                     color: isCurrentHour
                       ? "hsl(var(--primary))"
+                      : trackedMins > 0
+                      ? "hsl(var(--foreground))"
                       : "hsl(var(--muted-foreground))",
-                    opacity: cellIsElapsed ? 0.6 : isCurrentHour ? 1 : 0.5,
+                    opacity: cellIsElapsed ? 0.7 : isCurrentHour ? 1 : trackedMins > 0 ? 0.9 : 0.4,
                     zIndex: 10,
                     lineHeight: 1,
+                    transition: "font-size 0.3s ease",
                   }}
                 >
                   {String(hour).padStart(2, "0")}
@@ -222,7 +253,10 @@ export default function Timeline() {
                 {hourEntries.map(({ entry, seg, cat }, idx) => (
                   <div
                     key={`${entry.id}-${hour}`}
-                    onClick={() => setEditingEntry(entry)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingEntry(entry);
+                    }}
                     className="absolute cursor-pointer hover:brightness-105 active:brightness-90 transition-all z-10"
                     style={{
                       top: `${seg.topPct}%`,
@@ -288,6 +322,86 @@ export default function Timeline() {
 
       {/* Edit Entry Drawer */}
       <EditEntryDrawer entry={editingEntry} onClose={() => setEditingEntry(null)} />
+
+      {/* Hour Detail Drawer — list of all activities in that hour */}
+      <Drawer.Root
+        open={selectedHour !== null}
+        onOpenChange={(open) => !open && setSelectedHour(null)}
+      >
+        <Drawer.Portal>
+          <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50 backdrop-blur-sm" />
+          <Drawer.Content className="bg-card flex flex-col mt-24 fixed bottom-0 left-0 right-0 z-50 pb-8 border-t-2 border-border max-h-[70vh]">
+            <div className="px-5 pt-4 flex-shrink-0">
+              <div className="mx-auto w-12 h-0.5 bg-muted-foreground/30 mb-5" />
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-2xl font-bold uppercase tracking-tight font-mono">
+                    {selectedHour !== null ? String(selectedHour).padStart(2, "0") : ""}:00
+                  </h2>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                    {hourDetailEntries.length === 0 ? "No activities" : `${hourDetailEntries.length} activit${hourDetailEntries.length === 1 ? "y" : "ies"}`}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedHour(null)}
+                  className="w-9 h-9 border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 space-y-[2px]">
+              {hourDetailEntries.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-sm font-bold uppercase tracking-wide">Nothing logged here</p>
+                  <p className="text-xs mt-1 opacity-70">Tap the + button to add an entry</p>
+                </div>
+              ) : (
+                hourDetailEntries.map(({ entry, cat }) => {
+                  const durationMins = differenceInMinutes(
+                    parseISO(entry.endTime),
+                    parseISO(entry.startTime)
+                  );
+                  return (
+                    <div
+                      key={entry.id}
+                      className="flex items-center gap-3 px-3 py-3 bg-background border border-border cursor-pointer hover:bg-muted transition-colors"
+                      onClick={() => {
+                        setSelectedHour(null);
+                        setTimeout(() => setEditingEntry(entry), 150);
+                      }}
+                    >
+                      <div
+                        className="w-1 self-stretch flex-shrink-0"
+                        style={{ backgroundColor: cat?.color ?? "#aaa" }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-sm uppercase tracking-wide truncate">
+                          {entry.description || cat?.name || "Untitled"}
+                        </div>
+                        <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
+                          {fmtTime(entry.startTime)} – {fmtTime(entry.endTime)}
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0 text-right">
+                        <div className="text-xs font-mono font-bold text-foreground">
+                          {durationMins}m
+                        </div>
+                        {cat && (
+                          <div className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                            {cat.name}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
 
       {/* Day Summary strip */}
       <div className="flex-shrink-0 bg-card border-t-2 border-border px-4 py-2">
