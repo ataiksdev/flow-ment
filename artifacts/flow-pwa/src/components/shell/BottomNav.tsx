@@ -9,10 +9,10 @@ interface BottomNavProps {
 export default function BottomNav({ currentPath }: BottomNavProps) {
   const navItems = [
     { name: "Timeline", path: "/", icon: Clock },
-    { name: "Timer", path: "/timer", icon: Timer },
-    { name: "Compose", path: "/habits", icon: Layers },
     { name: "Plan", path: "/plan", icon: CalendarDays },
-    { name: "Analytics", path: "/analytics", icon: BarChart2 },
+    { name: "Compose", path: "/habits", icon: Layers },
+    { name: "Focus", path: "/timer", icon: Timer },
+    { name: "Settings", path: "/settings", icon: BarChart2 },
   ];
 
   return (

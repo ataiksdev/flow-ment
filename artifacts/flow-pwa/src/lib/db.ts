@@ -232,7 +232,7 @@ export async function initDB() {
 export const dbEvents = new EventTarget();
 
 export function emitDbChange(storeName: keyof FlowDB | 'all') {
-  dbEvents.dispatchEvent(new Event(storeName));
+  dbEvents.dispatchEvent(new Event(storeName as string));
   if (storeName !== 'all') {
     dbEvents.dispatchEvent(new Event('all'));
   }
@@ -240,10 +240,10 @@ export function emitDbChange(storeName: keyof FlowDB | 'all') {
 
 export async function exportAllData() {
   const db = await initDB();
-  const stores: (keyof FlowDB)[] = ['timeEntries', 'timerSessions', 'categories', 'habits', 'habitLogs', 'heartbeats', 'settings', 'compositions'];
+  const stores = ['timeEntries', 'timerSessions', 'categories', 'habits', 'habitLogs', 'heartbeats', 'settings', 'compositions', 'planTasks', 'goals'] as const;
   const exportData: Record<string, any[]> = {};
   for (const storeName of stores) {
-    exportData[storeName] = await db.getAll(storeName);
+    exportData[storeName] = await db.getAll(storeName as any);
   }
   return JSON.stringify(exportData, null, 2);
 }
@@ -251,11 +251,11 @@ export async function exportAllData() {
 export async function importAllData(jsonString: string, mode: 'merge' | 'replace') {
   const data = JSON.parse(jsonString);
   const db = await initDB();
-  const stores: (keyof FlowDB)[] = ['timeEntries', 'timerSessions', 'categories', 'habits', 'habitLogs', 'heartbeats', 'settings', 'compositions'];
-  const tx = db.transaction(stores, 'readwrite');
+  const stores = ['timeEntries', 'timerSessions', 'categories', 'habits', 'habitLogs', 'heartbeats', 'settings', 'compositions', 'planTasks', 'goals'] as const;
+  const tx = db.transaction(stores as any, 'readwrite');
   for (const storeName of stores) {
     if (data[storeName] && Array.isArray(data[storeName])) {
-      const store = tx.objectStore(storeName);
+      const store = tx.objectStore(storeName as any);
       if (mode === 'replace') await store.clear();
       for (const item of data[storeName]) {
         await store.put(item);
@@ -268,10 +268,10 @@ export async function importAllData(jsonString: string, mode: 'merge' | 'replace
 
 export async function clearAllData() {
   const db = await initDB();
-  const stores: (keyof FlowDB)[] = ['timeEntries', 'timerSessions', 'categories', 'habits', 'habitLogs', 'heartbeats'];
-  const tx = db.transaction(stores, 'readwrite');
+  const stores = ['timeEntries', 'timerSessions', 'categories', 'habits', 'habitLogs', 'heartbeats', 'settings', 'compositions', 'planTasks', 'goals'] as const;
+  const tx = db.transaction(stores as any, 'readwrite');
   for (const storeName of stores) {
-    await tx.objectStore(storeName).clear();
+    await tx.objectStore(storeName as any).clear();
   }
   await tx.done;
   emitDbChange('all');

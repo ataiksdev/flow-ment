@@ -31,7 +31,7 @@ export default defineConfig({
   base: basePath,
   plugins: [
     react(),
-    tailwindcss(),
+    // tailwindcss(), // bypassing vite plugin due to workspace res bug
     runtimeErrorOverlay(),
     VitePWA({
       registerType: 'autoUpdate',

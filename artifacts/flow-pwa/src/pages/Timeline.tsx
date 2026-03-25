@@ -3,6 +3,7 @@ import { format, addDays, subDays, parseISO, differenceInMinutes } from "date-fn
 import { ChevronLeft, ChevronRight, X, Check } from "lucide-react";
 import { useTimeEntries, useCategories, useSettings, useUpdateSetting } from "@/hooks/useDB";
 import { EditEntryDrawer } from "@/components/EditEntryDrawer";
+import { StreakCalendar } from "@/components/StreakCalendar";
 import type { TimeEntry } from "@/lib/db";
 import { Drawer } from "vaul";
 
@@ -219,6 +220,7 @@ export default function Timeline() {
           )}
         </div>
       </header>
+      <StreakCalendar />
 
       {/* Frog of the Day Banner */}
       {frogDate === todayStr && frogText && (

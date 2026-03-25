@@ -1,4 +1,6 @@
 # See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+.github
+.vscode
 
 # compiled output
 dist
@@ -43,7 +45,15 @@ Thumbs.db
 
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+artifacts/flow-pwa/postcss.config.local.js
+artifacts/flow-pwa/vite.config.local.ts
+artifacts/flow-pwa/tests/
 
 # Replit
 .cache/
 .local/
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
+artifacts/flow-pwa/css_output.txt
